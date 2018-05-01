@@ -1,0 +1,49 @@
+%!TEX root = paper.tex
+
+\section{Introduction}
+\label{sec:intro}
+
+Multi-set (aka bag) constraints are very useful for the specification of constraints over data structures.
+For example, the inductive definition of a binary search tree storing integer values rooted at $E$ and having the multi-set of values $M$ is
+specified by the following inductive definition in Separation Logic~\cite{EneaSW15}:
+\begin{align}
+\mathtt{bst}(E,M) &::= E = nil \land M=\bagone{} \\
+\mathtt{bst}(E,M) &::= \exists L, R, d.\ E\mapsto \{(\mathtt{left},L), (\mathtt{right}, R), (\mathtt{data}, d)\}  \\
+& \star \mathtt{bst}(L, M_L) \star \mathtt{bst}(R,M_R) \nonumber \\
+& \land E\neq nil \land M_L \le \bagone{d} < M_R \land M=M_L \bplus \bagone{d} \bplus M_R \nonumber
+\end{align}
+The first equation specifies the case of an empty tree, where the root $E$ is null and the parameter $M$ is an empty bag.
+The second equation specifies a non null node at location $E$ where the fields $\mathtt{left}$, $\mathtt{right}$, and $\mathtt{data}$ contain as values
+$L$, $R$, resp. $d$ (atom $E\mapsto \{(\mathtt{left},L), (\mathtt{right}, R), (\mathtt{data}, d)\}$).
+The locations $L$ and $R$ are roots of binary search trees of values in $M_L$ resp. $M_R$ (atoms $ \mathtt{bst}(L, M_L)$ resp.  $\mathtt{bst}(R,M_R)$),
+disjoint pairwise and from the node at $E$ (due to the use of the separating conjunction $\star$).
+The constraint between the multi-sets of values and the value $d$, $M_L \le \bagone{d} < M_R$, specifies that
+all values in the left sub-tree are less than $d$ and $d$ is strictly less than all values in the right sub-tree. 
+
+This paper focuses on providing decision procedures for checking satisfiability of quantifier free constraints in the theory of multi-sets with integer elements.
+This theory includes atomic formulas like above, for example comparison of multi-set minimal value with an integer (e.g., $\bagone{d} < M_R$) or the extremal value of another multi-set (e.g., $M_L < M_R$),
+equality or inclusion between multi-set terms (e.g., $M=M_L \bplus \bagone{d} \bplus M_R$). 
+Such a theory is used in verification tools based on Separation Logic extensions, for example~\cite{EneaSW15,verifast}.
+
+The choice of this restricted set of atomic constraints allows us to propose two decision procedures based on the reduction to satisfiability problem on theories over integers. More precisely, the first procedure proceeds by reduction to the theory of quantifier free logic of linear arithmetics, i.e., the QFLIA theory in SMTLIB format~\cite{SMTLIB10}. This theory is very efficiently dealt by existing SMT solvers, e.g.,
+%CVC4 or Z3.
+CVC4~\cite{barrett2011cvc4} or Z3~\cite{de2008z3}.
+The second procedure reduces the satisfiability checking to the extension of QFLIA with uninterpreted functions, i.e., Moreover, because these solvers support also an extension of this theory with uninterpreted functions, i.e., QFUFLIA.
+The reduction algorithms are optimised to generate formulas in these theories with less atomic constraints, which are more efficiently dealt by SMT solvers.
+
+\paragraph{Related work:}
+The complexity of deciding constraints in different theories including sets with generic elements (i.e., a theory of elements over which only equality is defined) have been studied in \cite{DBLP:conf/csl/AikenKVW93,DBLP:journals/scp/OliveiraDF12}.
+%
+For the theory of multi-sets of uninterpreted elements and integers, Zarba~\cite{zarba2002combining} proposes a decision procedure for the quantifier free fragment that is NP-complete. It is an extension of Nelson-Oppen combination method. 
+Our first procedure is inspired by Zarba's procedure, but we don't consider uninterpreted elements, but we introduce comparison of extremal elements of multi-sets with integers. 
+%
+A decision procedure for finite multi-sets with cardinality constraints has been proposed in \cite{DBLP:conf/csl/KuncakPS10} and implemented in MUNCH~\cite{DBLP:conf/cade/PiskacK10}. The absence of cardinality constraints in our theory make simpler the decision procedure. Notice that the cardinality constraints are dealt by the inductive predicates in the verification tools based on Separation Logic like \cite{EneaSW15,verifast}
+%
+Our theory can be also reduced to the theory of arrays. We don't consider this option because constraints like $M_L < M_R$ are encoded using quantified formulas, which are not dealt efficiently by SMT solvers.
+
+\paragraph{Paper organisation:}
+Section~\ref{sec:logic} introduces the theory we are considering and some interesting fragments. The decision procedures are presented in Sections~\ref{sec:fsimple} and \ref{sec:forder}.
+The optimisations introduced by our implementation are presented in Section~\ref{sec:implementation}.
+The full details of our procedures and their proofs are included in the appendix.
+
+% \td{Plan of the report.}

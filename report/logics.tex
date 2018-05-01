@@ -1,0 +1,444 @@
+%!TEX root = main.tex
+
+\section{Logic \QFBILIA}
+\label{sec:logic}
+
+This section presents the logic fragment of \emph{quantifier free logic over bags of integers and linear arithmetics}, \QFBILIA.
+We define its syntax, its semantics, and the sub-fragments used in the decision procedures defined in Sections~\ref{sec:fsimple} and \ref{sec:forder}.
+
+\subsection{Syntax}
+\label{ssec:syn}
+
+We denote by $\bot$, $\top$ the extremum term such as $\forall k \in \ZZ, k > \bot$, resp. $k < \top$, we have $\bot < \top$ \cite{piskac2010decision}.
+We donote by $\ZZ^{\prec}$ the set $\ZZ \cup \{\bot,\top\}$.
+We use the classic notations for operations over $\ZZ$.
+Integer constants are denoted by $k$, natural ones by $n$.
+Let $V_{int}=\{a,b,c,\ldots\}$ be a finite set of symbols denoting integer variables, i.e., variables with values in $\ZZ$.
+Let $V_{ext}=\{m,n,p,\ldots\}$ be a finite set of symbols denoting extremum variables, i.e., variables with values in $\ZZ^{\prec}$.
+We denote by $\MM[\ZZ]$ the domain of bags over integers, i.e.,
+the set of functions $\ZZ\flc\NN$.
+Let $V_{bag}=\{x,y,z,\ldots\}$ be a finite set of symbols denoting bag variables, i.e., variables with values in $\MM[\ZZ]$.
+We suppose that $V_{int}$, $V_{ext}$ and $V_{bag}$ are disjoint and we don't write explicitly the type ($\ZZ$, $\ZZ^{\prec}$ or $\MM[\ZZ]$) of each variable.
+
+%\td{Contraindre $a\in T_{bag}$ ou amélioré procedure. (STEP 2)}
+
+\begin{mydef}
+A \QFBILIA\ formula $F$ is defined by the following grammar:
+\begin{align*}
+F ::= &\ L \; | \; F\lor F \; | \; F\land F \; | \; \lnot F \; | \; F\limp F
+& \textit{formula}
+\\
+L ::= &\ L_{int} \; |\; L_{bag} \; |\; L_{mix} \; |\; L_{ext}
+& \textit{boolean atom}
+\\
+L_{int} ::= &\ T_{int} = T_{int} \; |\; T_{int} \neq T_{int} \; |\; T_{int} < T_{int}\; |\;  T_{int} \ge T_{int}
+\\
+L_{ext} ::= &\ T_{ext} = T_{ext} \; |\; T_{ext} \neq T_{ext} \; |\; T_{ext} < T_{ext}\; |\;  T_{ext} \ge T_{ext}
+\\
+L_{bag} ::= &\ T_{bag} = T_{bag} \; |\;T_{bag} \neq T_{bag} \; |\;
+T_{bag} \subseteq T_{bag} \; |\;T_{bag} \nsubseteq T_{bag} \; | \;
+\\
+&\ T_{bag} < T_{bag} \; |\;T_{bag} \ge T_{bag}
+\\
+L_{mix} ::= &\ a \in T_{bag}\; |\;a \notin T_{bag}\; |\;a \in^{n} T_{bag}\; |\;a \notin^{n} T_{bag}\;|\;
+\\
+&\ m \in T_{bag}\; |\;m \notin T_{bag}\; |\;m \in^{n} T_{bag}\; |\;m \notin^{n} T_{bag}
+\\
+T_{int} ::= &\  k \;|\; a \;|\; T_{int} + T_{int} \;|\; T_{int} - T_{int}\;|\;
+& \textit{integer term}
+\\
+&\ \max(T_{int},T_{int})\;|\; \min(T_{int},T_{int}) \;|\; \ite(F,T_{int},T_{int})
+\\
+T_{ext} ::= &\ k \;|\; m \;|\; \min(T_{bag}) \;|\; \max(T_{bag}) \;|\; \ite(F,T_{ext},T_{ext})
+& \textit{extremum term}
+\\
+T_{bag} ::= &\ \bagone{}\;|\;\bagone{a} \;|\;\bagone{m} \;|\;x \;|\; T_{bag} \cup T_{bag} \;|\; T_{bag} \cap T_{bag} \;|\;
+& \textit{bag term}
+\\
+&\ T_{bag} \setminus T_{bag}\;|\; T_{bag} \uplus T_{bag} \;|\; \ite(F,T_{bag},T_{bag})
+\\
+\end{align*}
+We denote by $\cF$ the set of formulas in \QFBILIA, by $\cT_{int}$ the set of integer terms, by $\cT_{ext}$ the set of extremum terms, and by $\cT_{bag}$ the set of multi-set terms.
+\end{mydef}
+
+For a formula $F$, we denote by $V_{int}(F)$, $V_{ext}(F)$ and $V_{bag}(F)$  the set of integer, resp. extremum, resp. multi-set variables used in $F$.
+We denote by $V(F) = V_{int}(F) \cup V_{ext}(F) \cup V_{bag}(F)$ the set of variables used in $F$.
+The same notation is overloaded for atoms and terms in \QFBILIA.
+For a formula $F$, we denote by $L_{int}(F)$, $L_{bag}(F)$, $L_{ext}(F)$ and $L_{mix}(F)$ the multi-set of integer, resp. multi-set, resp. mix literals in $F$.
+We denote by $L(F) = L_{int}(F) \uplus L_{bag}(F) \uplus L_{mix}(F) \uplus L_{ext}(F)$ the multi-set of literals in $F$.
+
+
+
+\subsection{Semantics}
+\label{ssec:sem}
+% \td{Reussir a dire que la min(empyset) non defini et emptyset comp toujours faux}
+
+% \subsubsection{General Semantics}
+% \subsubsection{\QFBILIA\ Semantics}
+
+A valuation $I_{int}$ of variables in $V_{int}$ is a function mapping variables in $V_{int}$ to values in $\ZZ$, i.e.,
+$I_{int} \; : \; V_{int} \flc \ZZ$.
+Similarly, $I_{ext} \; : \; V_{ext} \flc \ZZ^{\prec}$ denotes a valuation of variables in $V_{ext}$ 
+and
+$I_{bag} \; : \; V_{bag} \flc \MM[\ZZ]$ denotes a valuation of variables in $V_{bag}$.
+A valuation $I$ of variables in $V_{int}\cup V_{bag} \cup V_{ext}$ is a tuple of valuations $(I_{int}, I_{bag}, I_{ext})$;
+we denote by $I_{int}$, $I_{bag}$ and $I_{ext}$ the first, resp. second, resp. third component of a valuation $I$.
+Let $\cI$ be the set of valuations over variables in $V_{int}\cup V_{bag}\cup V_{ext}$.
+Two valuations $I$ and $I'$ \emph{agree} on a set of variables $V$ iff $\forall v\in V.\ I(v) = I'(v)$.
+For a valuation $I_{bag}$ of variables in $V_{bag}$ and a bag variable $x$ we denote by
+$\mathcal{D}(I_{bag}(x)) = \left\{ v \in \ZZ | I_{bag}(x)(v) > 0 \right\}$ the integers occuring in the bag.
+
+The semantics of \QFBILIA\ is defined by
+\begin{itemize}
+\item a function $\ ^*: \cI\flc \cT_{int}\flc \ZZ$ mapping a valuation and an integer term to an integer value,
+\item a function $\ ^{\bullet}: \cI\flc \cT_{ext}\flc \ZZ\cup\{\bot,\top\}$ mapping a valuation and an integer term to an extremum value,
+\item a function $\ ^\circ: \cI\flc \cT_{bag}\flc \MM[\ZZ]$ mapping a valuation and a multi-set term to a multi-set value,
+\item a relation $\ \models \subseteq \cI\times \cF$ between valuations and formulas.
+\end{itemize}
+The components above are defined inductively on the syntax of terms and formulas in a mutually recursive way.
+This is due to the presence of $\ite$ terms.
+
+%\td{bot top mais compliquer car + - a exclure etc ...}
+Given a valuation $I$ and an integer term $T_{int}$, the valuation of $T_{int}$ in $\ZZ$,
+denoted by $I^*(T_{int})$, is defined as follows:
+\begin{align*}
+I^*(k) \triangleq&\ k
+\\
+I^*(a) \triangleq&\ I_{int}(a)
+\\
+I^*(T^1_{int} + T^2_{int}) \triangleq&\ I^*(T^1_{int})  + I^*(T^2_{int})
+\\
+I^*(T^1_{int} - T^2_{int}) \triangleq&\ I^*(T^1_{int})  - I^*(T^2_{int})
+\\
+I^*(\max(T^1_{int}, T^2_{int})) \triangleq&\ \max(I^*(T^1_{int}), I^*(T^2_{int}))
+\\
+I^*(\min(T^1_{int}, T^2_{int})) \triangleq&\ \min(I^*(T^1_{int}), I^*(T^2_{int}))
+% \\
+% I^*(\min(T_{bag})) \triangleq&\ k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'< k.~I^\circ(T_{bag})(k')=0
+% \\
+% I^*(\max(T_{bag})) \triangleq&\ k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'> k.~I^\circ(T_{bag})(k')=0
+\\
+I^*(\ite(F, T^1_{int}, T^2_{int})) \triangleq&\
+\left\{\begin{array}{ll}
+I^*(T^1_{int}) & \mbox{if } I\models F \\
+I^*(T^2_{int}) & \mbox{otherwise}
+\end{array}\right.
+\end{align*}
+where $\max(k_1,k_2)$ and $\min(k_1,k_2)$ are the minimum and maximum operations over $\ZZ$.
+
+Given a valuation $I$ and an extremum term $T_{ext}$, the valuation of $T_{ext}$ in $\ZZ\cup\{\bot,\top\}$,
+denoted by $I^{\bullet}(T_{ext})$, is defined as follows:
+\begin{align*}
+% I^{\bullet}(\bot) \triangleq&\ \bot
+% \\
+% I^{\bullet}(\top) \triangleq&\ \top
+% \\
+% I^{\bullet}(\min(T_{bag})) \triangleq&\ k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'< k.~I^\circ(T_{bag})(k')=0
+% \\
+% I^{\bullet}(\max(T_{bag})) \triangleq&\ k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'> k.~I^\circ(T_{bag})(k')=0
+% \\
+I^{\bullet}(k) \triangleq&\ k
+\\
+I^{\bullet}(m) \triangleq&\ I_{ext}(m)
+\\
+I^{\bullet}(\min(T_{bag})) \triangleq&\
+\left\{\begin{array}{ll}
+\top \mbox{ if } \forall k',I^\circ(T_{bag})(k')=0 \\
+k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'< k.~I^\circ(T_{bag})(k')=0
+\end{array}\right.
+\\
+I^{\bullet}(\max(T_{bag})) \triangleq&\
+\left\{\begin{array}{ll}
+\bot \mbox{ if } \forall k',I^\circ(T_{bag})(k')=0 \\
+k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'> k.~I^\circ(T_{bag})(k')=0
+\end{array}\right.
+\\
+I^{\bullet}(\ite(F, T^1_{ext}, T^2_{ext})) \triangleq&\
+\left\{\begin{array}{ll}
+I^{\bullet}(T^1_{ext}) & \mbox{if } I\models F \\
+I^{\bullet}(T^2_{ext}) & \mbox{otherwise}
+\end{array}\right.
+\end{align*}
+
+Given a valuation $I$ and a bag term $T_{bag}$, the valuation of $T_{bag}$ in $\MM[\ZZ]$,
+denoted by $I^\circ(T_{bag})$, is defined as follows:
+\begin{align*}
+I^\circ(\bagone{}) \triangleq&\ M \mbox{ s.t. }\forall k.~M(k)=0
+\\
+I^\circ(\bagone{a}) \triangleq&\ M \mbox{ s.t. }M(a)=1 \mbox{ and } \forall k\neq a.~M(k)=0
+\\
+I^\circ(\bagone{m}) \triangleq&\
+\left\{\begin{array}{ll}
+M \mbox{ s.t. } M(m)=1 \mbox{ and} & \forall k\neq m.~M(k)=0 \\
+  & \mbox{if } I_{ext}(m) \not\in\{\bot,\top\} \\
+M \mbox{ s.t. } \forall k.~M(k)=0 & \mbox{otherwise}
+\end{array}\right.
+\\
+I^\circ(x) \triangleq&\ I_{bag}(x)
+\\
+I^\circ(T^1_{bag} \cup T^2_{bag}) \triangleq&\ M\mbox{ s.t. }\forall k.~M(k)=\max(I^\circ(T^1_{bag})(k), I^\circ(T^2_{bag})(k))
+\\
+I^\circ(T^1_{bag} \cap T^2_{bag}) \triangleq&\ M\mbox{ s.t. }\forall k.~M(k)=\min(I^\circ(T^1_{bag})(k), I^\circ(T^2_{bag})(k))
+\\
+I^\circ(T^1_{bag} \setminus T^2_{bag}) \triangleq&\ M\mbox{ s.t. }\forall k.~M(k)=\max(0, I^\circ(T^1_{bag})(k) - I^\circ(T^2_{bag})(k))
+\\
+I^\circ(T^1_{bag} \uplus T^2_{bag}) \triangleq&\ M\mbox{ s.t. }\forall k.~M(k)=I^\circ(T^1_{bag})(k) + I^\circ(T^2_{bag})(k)
+\\
+I^\circ(\ite(F,T^1_{bag},T^2_{bag})) \triangleq&\
+\left\{\begin{array}{ll}
+I^\circ(T^1_{bag}) & \mbox{if } I \models F \\
+I^\circ(T^2_{bag}) & \mbox{otherwise}
+\end{array}\right.
+\end{align*}
+
+Given a valuation $I$ and an integer atom $L_{int}$, the satisfiability relation $I \models L_{int}$ is defined by structural induction as follows:
+\begin{align*}
+I \models T^1_{int}=T^2_{int} \mbox{ iff }& I^*(T^1_{int}) = I^*(T^2_{int}) \\
+I \models T^1_{int}\ne T^2_{int} \mbox{ iff }& I^*(T^1_{int}) \ne I^*(T^2_{int}) \\
+I \models T^1_{int} < T^2_{int} \mbox{ iff }& I^*(T^1_{int}) < I^*(T^2_{int}) \\
+I \models T^1_{int}\ge T^2_{int} \mbox{ iff }& I^*(T^1_{int}) \ge I^*(T^2_{int})
+\end{align*}
+
+Given a valuation $I$ and an integer atom $L_{ext}$, the satisfiability relation $I \models L_{ext}$ is defined by structural induction as follows:
+\begin{align*}
+I \models T^1_{ext}=T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) = I^{\bullet}(T^2_{ext}) \\
+I \models T^1_{ext}\ne T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) \ne I^{\bullet}(T^2_{ext}) \\
+I \models T^1_{ext} < T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) < I^{\bullet}(T^2_{ext}) \\
+I \models T^1_{ext}\ge T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) \ge I^{\bullet}(T^2_{ext})
+\end{align*}
+
+Given a valuation $I$ and a bag atom $L_{bag}$, the satisfiability relation $I \models L_{bag}$ is defined by structural induction as follows:
+\begin{align*}
+I \models T^1_{bag} = T^2_{bag} \mbox{ iff }& \forall k.~I^\circ(T^1_{bag})(k) = I^\circ(T^2_{bag})(k) \\
+I \models T^1_{bag} \neq T^2_{bag} \mbox{ iff }& \exists k.~I^\circ(T^1_{bag})(k) \neq I^\circ(T^2_{bag})(k) \\
+I \models T^1_{bag} \subseteq T^2_{bag} \mbox{ iff }& \forall k.~I^\circ(T^1_{bag})(k) \leq I^\circ(T^2_{bag})(k) \\
+I \models T^1_{bag} \nsubseteq T^2_{bag} \mbox{ iff }& \exists k.~I^\circ(T^1_{bag})(k) > I^\circ(T^2_{bag})(k) \\
+I \models T^1_{bag} < T^2_{bag} \mbox{ iff }& I^\circ(\max(T^1_{bag})) < I^\circ(\min(T^2_{bag})) \\
+I \models T^1_{bag} \ge T^2_{bag} \mbox{ iff }& I^\circ(\min(T^1_{bag})) \ge I^\circ(\max(T^2_{bag}))
+\end{align*}
+
+Given a valuation $I$ and a mixed atom $L_{mix}$, the satisfiability relation $I \models L_{mix}$ is defined by structural induction as follows:
+\begin{align*}
+I \models a\in T^2_{bag} \mbox{ iff }& I^\circ(T^2_{bag})\big(I_{int}(a)\big) \ge 1 \\
+I \models a\notin T^2_{bag} \mbox{ iff }& I^\circ(T^2_{bag})\big(I_{int}(a)\big) = 0 \\
+I \models a\in^{n} T^2_{bag} \mbox{ iff }& I^\circ(T^2_{bag})\big(I_{int}(a)\big) \ge n \\
+I \models a\notin^{n} T^2_{bag} \mbox{ iff }& I^\circ(T^2_{bag})\big(I_{int}(a)\big) < n \\
+I \models m\in T^2_{bag} \mbox{ iff }& \left\{\begin{array}{ll}
+I^\circ(T^2_{bag})\big(I_{ext}(m)\big) \ge 1 & \mbox{if } I_{ext}(m)\not\in\{\bot ,\top\} \\
+True & \mbox{if } \forall k.~I^\circ(T^2_{bag})\big(k) = 0 \\
+     &\quad \land\ (I_{ext}(m) \in \{\bot,\top\})\\
+False & \mbox{otherwise}
+\end{array}\right.\\
+I \models m\notin T^2_{bag} \mbox{ iff }& \left\{\begin{array}{ll}
+I^\circ(T^2_{bag})\big(I_{ext}(m)\big) = 0 & \mbox{if } I_{ext}(m)\not\in\{\bot ,\top\} \\
+False & \mbox{if } \forall k.~I^\circ(T^2_{bag})\big(k) = 0 \\
+     &\quad \land\ (I_{ext}(m) \in \{\bot,\top\})\\
+True & \mbox{otherwise}
+\end{array}\right.\\
+I \models m\in^{n} T^2_{bag} \mbox{ iff }& \left\{\begin{array}{ll}
+I^\circ(T^2_{bag})\big(I_{ext}(m)\big) \ge n & \mbox{if } I_{ext}(m)\not\in\{\bot ,\top\} \\
+True & \mbox{if } \forall k.~I^\circ(T^2_{bag})\big(k) = 0  \land n = 1\\
+     &\quad \land\ (I_{ext}(m) \in \{\bot,\top\})\\
+False & \mbox{otherwise}
+\end{array}\right.\\
+I \models m\notin^{n} T^2_{bag} \mbox{ iff }& \left\{\begin{array}{ll}
+I^\circ(T^2_{bag})\big(I_{ext}(m)\big) < n & \mbox{if } I_{ext}(m)\not\in\{\bot ,\top\} \\
+False & \mbox{if } \forall k.~I^\circ(T^2_{bag})\big(k) = 0 \land n = 1\\
+     &\quad \land\ (I_{ext}(m) \in \{\bot,\top\})\\
+True & \mbox{otherwise}
+\end{array}\right.\\
+\end{align*}
+
+Given a valuation $I$ and a formula $F$, the satisfiability relation $I \models F$ is defined by induction on the form of the formula as follows:
+\begin{align*}
+I \models L \mbox{ iff }& I \models L \\
+I \models F_1\lor F_2 \mbox{ iff } & I \models F_1 \mbox{ or } I\models F_2 \\
+I \models F_1\land F_2 \mbox{ iff } & I \models F_1 \mbox{ and } I\models F_2 \\
+I \models \lnot F \mbox{ iff } & I \not\models F \\
+I \models F_1\limp F_2 \mbox{ iff } & I \models \lnot F_1 \mbox{ or } I\models F_2
+\end{align*}
+
+\begin{mydef}
+  A \QFBILIA\ formula $F$ is \emph{satisfiable} if there exists a valuation $I$, called also its model, such that $I \models F$.
+\end{mydef}
+
+Let denote by $\bagone{F}$ the set of models of $F$. Thus, a formula $F$ is satisfiable if $\bagone{F}\neq\emptyset$.
+
+\begin{mydef}
+  Two formula $F$ and $F'$ are \emph{semi-equivalent}, denoted $F \sim F'$,
+  if $V(F)\subseteq V(F')$ or $V(F')\subseteq V(F)$ and $\forall I \in \bagone{F},\exists I'\in \bagone{F'}$ that agrees on $V(F)\cap V(F')$, and $\forall I' \in \bagone{F'},\exists I\in \bagone{F}$ that agrees on $V(F)\cap V(F')$.
+\end{mydef}
+
+\begin{mydef}
+  Two formula $F$ and $F'$ are \emph{equi-satisfiable}, denoted $F \sim_{\mathit{sat}} F'$,
+  if $\bagone{F}\neq\emptyset$ if and only if $\bagone{F'}\neq\emptyset$.
+\end{mydef}
+
+
+% \begin{mydef}
+%   Two formula $F$ and $F'$ are equivalent, denoted $F \sim F'$,
+%   if they have the same set of models, i.e., $\bagone{F}=\bagone{F'}$.
+% \end{mydef}
+
+% \subsubsection{\textsf{QFUFLIA} Semantics}
+% A valuation $I_{fun}$ of variables in $V_{fun}$ is a function mapping variables in $V_{fun}$ to values in $\ZZ \flc \ZZ$, i.e.,
+% $I_{fun} \; : \; V_{fun} \flc (\ZZ\flc\ZZ)$.
+% A valuation $I$ of variables in $V_{int}\cup V_{fun}$ is a pair of valuations $(I_{int}, I_{fun})$;
+% we denote by $I_{int}$ and $I_{fun}$ the first resp. second component of a valuation $I$.
+%
+% The semantics of \textsf{QFUFLIA} is defined by
+% \begin{itemize}
+% \item a function $\ ^*: \cI\flc \cT_{int}\flc \ZZ$ mapping a valuation and an integer term to an integer value,
+% \item a function $\ ^*: \cI\flc \cT_{fun}\flc (\ZZ\flc\ZZ)$ mapping a valuation and a multi-set term to a multi-set value,
+% \item a relation $\ \models \subseteq \cI\times \cF$ between valuations and formulas.
+% \end{itemize}
+% %The components above are defined inductively on the syntax of terms and formulas in a mutually recursive way.
+
+% \begin{mydef}
+%   A \textsf{QFUFLIA} formula $F$ is \emph{satisfiable} if there exists a valuation $I$, called also its model, such that $I \models F$.
+% \end{mydef}
+
+\subsection{Examples}
+
+\begin{myex}
+If an integer $a$ is in a multi-set $x$, the multi-set $\llbracket a \rrbracket$ is included in the union of multi-sets $x$ and $y$:
+\begin{equation}
+\label{ex1}
+%(a \notin x) \lor (\llbracket a \rrbracket \subseteq (x\cup y))\notag
+(a \in x) \limp (\llbracket a \rrbracket \subseteq (x\cup y))
+\end{equation}
+\end{myex}
+
+\begin{myex}
+If $1$ is the smallest element of a multi-set $x$ then $x$ is less than $y$ 
+otherwise $x$ is greater than $z$:
+\begin{equation}
+\label{ex2}
+%\big((\min(x) \neq 1) \lor (x<y)\big) \land \big((\min(x) = 1) \lor (x < z)\big) \notag
+\big((\min(x) = 1) \limp (x<y)) \land \big((\min(x) \neq 1) \limp (x < z)\big)
+\end{equation}
+\end{myex}
+\begin{myex}
+If the maximum of a multi-set $x$ is $0$ then $x$ is the empty bag or the minimum of $x$ is not $0$:
+\begin{equation}
+\label{ex3}
+%(\max(x) \neq 0) \lor ((x = \bagone{}) \lor (\min(x) \neq 0))
+(\max(x) = 0) \limp \big((x = \bagone{}) \lor (\min(x) \neq 0)\big)
+\end{equation}
+\end{myex}
+
+
+\subsection{Main Fragments}
+\label{ssec:frag}
+
+The \QFBILIA\ logic contains several fragments that are interesting for its reduction to QFLIA theory because
+they are simpler in syntax but they are, in general, as expressive as \QFBILIA.
+
+\subsubsection{Fragment $\QFBILIA_\nnf$}
+\label{sssec:nnf}
+
+The $\QFBILIA_\nnf$ fragment contains only formulas in the negated normal form, i.e., the logical negation is pushed to the level of literals $L_{int}, L_{bag}, L_{mix}, L_{ext}$ and $\ite$ terms are not present.
+
+\begin{mydef}
+\label{def:nnf}
+A $\QFBILIA_\nnf$ formula $F$ is defined by the following grammar:
+\begin{align*}
+F ::= &\ L \; | \; F\lor F \; | \; F\land F
+\\
+L ::= &\ L_{int} \; |\; L_{bag} \; |\; L_{mix} \; |\; L_{ext}
+\\
+L_{int} ::= &\ T_{int} = T_{int} \; |\; T_{int} \neq T_{int} \; |\; T_{int} < T_{int}\; |\; T_{int} \ge T_{int}
+\\
+L_{ext} ::= &\ T_{ext} = T_{ext} \; |\; T_{ext} \neq T_{ext} \; |\; T_{ext} < T_{ext}\; |\;  T_{ext} \ge T_{ext}
+\\
+L_{bag} ::= &\  T_{bag} = T_{bag} \; |\;T_{bag} \neq T_{bag} \; |\;T_{bag} \subseteq T_{bag} \; |\;T_{bag} \nsubseteq T_{bag} \; | \; \notag\\
+&\ T_{bag} < T_{bag} \; |\;T_{bag} \ge T_{bag}
+\\
+L_{mix}  ::=  &\ T_{int} \in T_{bag}\; |\;T_{int} \notin T_{bag}\; |\;T_{int} \in^{n} T_{bag}\; |\;T_{int} \notin^{n} T_{bag}
+\notag\\
+T_{int} ::= &\  k \;|\; a \;|\; T_{int} + T_{int} \;|\; T_{int} - T_{int}\;|\;
+\\
+&\ \max(T_{int},T_{int})\;|\; \min(T_{int},T_{int})
+\\
+T_{ext} ::= &\ k \;|\; m \;|\; \min(T_{bag}) \;|\; \max(T_{bag})
+\\
+T_{bag} ::=  &\  \bagone{}\;|\;\bagone{a} \;|\;x \;|\; T_{bag} \cup T_{bag} \;|\; T_{bag} \cap T_{bag}\;|\; T_{bag} \setminus T_{bag}\;|\; T_{bag} \uplus T_{bag}
+\end{align*}
+
+We denote by $\cF_\nnf$, $\cT_{int,\nnf}$, $\cT_{ext,\nnf}$, and $\cT_{bag,\nnf}$ the set of formulas, integer terms, resp. extremum terms, resp. multi-set terms  in $\QFBILIA_\nnf$.
+\end{mydef}
+
+
+
+Thus, the examples (\ref{ex1}), (\ref{ex2}), and (\ref{ex3}) are rewritten in $\QFBILIA_\nnf$ as follows:
+\begin{eqnarray}
+\label{ex2}
+(a \notin x) \lor (\llbracket a \rrbracket \subseteq (x\cup y))
+\label{ex1nnf}
+\\
+\big((\min(x) \neq 1) \lor (x<y)\big) \land \big((\min(x) = 1) \lor (x < z)\big)
+\label{ex2nnf}
+\\
+(\max(x) \neq 0) \lor \big((x = \bagone{}) \lor (\min(x) \neq 0)\big)
+\label{ex3nnf}
+\end{eqnarray}
+
+
+
+Proposition~\ref{prop:nnf} (Section~\ref{ssec:dp-s1}) states that \QFBILIA\ and $\QFBILIA_\nnf$ have the same expressive power, i.e., for any formula $F$ in \QFBILIA, there exists an equivalent formula $\tilde{F}$ in $\QFBILIA_\nnf$.
+
+
+\subsubsection{Fragment $\QFBILIA_{pure}$}
+\label{sssec:pure}
+
+The $\QFBILIA_{pure}$ fragment allows only a restricted syntax for multi-set atoms and terms.
+Intuitively, we restrict the syntax to essential terms, where no syntactic sugar can be applied to simplify them.
+For example, the multi-set terms of the form $x\cup y \cup z$ are equivalent (semantically speaking)
+to a term $x\cup y'$ and the atom $y'=y\cup z$, where $y'$ is a fresh multi-set variable.
+Also, the atom $x\leq y$ is equivalent (wrt the semantics, i.e., allows same set of models) to the term $\max(x)\leq \min(y)$.
+The integer atoms using multi-set variables are reduced to only two equality constraints between an integer variable and the min or max of some multi-set variable.
+Thus, the fragment $\QFBILIA_{pure}$ contains only formulas with the simpler multi-set terms which are furthermore in negative normal form.
+%The intuition behind this logic is that we want operation to only occurs between two variables.
+
+%\td{Contraindre $a\in T_{bag}$}
+\begin{mydef}
+A $\QFBILIA_{pure}$ formula $F$ is defined by the following grammar:
+\begin{align*}
+F ::= &\ L \; | \; F\lor F \; | \; F\land F
+\\
+L ::= &\ L_{int} \; |\; L_{bag} \; |\; L_{mix} \; |\; L_{ext}
+\\
+L_{int} ::= &\ T_{int} = T_{int} \; |\; T_{int} \neq T_{int} \; |\; T_{int} < T_{int}\; |\; T_{int} \ge T_{int}
+\\
+L_{ext} ::= &\ T_{ext} = T_{ext} \; |\; T_{ext} \neq T_{ext} \; |\; T_{ext} < T_{ext}\; |\; T_{ext} \ge T_{ext}
+\\
+L_{bag} ::= &\ x = T_{bag} \; |\;x \neq y \; |\;x \subseteq y \; |\;x \nsubseteq y
+\\
+L_{mix} ::= &\ a \in x\; |\;a \notin x\; |\;a \in^{n} x\; |\;a \notin^{n} x
+\\
+T_{int} ::= &\ k \;|\; a \;|\; T_{int} + T_{int} \;|\; T_{int} - T_{int}\;|\; \max(T_{int},T_{int})\;|\; \min(T_{int},T_{int})
+\\
+T_{ext} ::= &\ k \;|\; m \;|\; min(x) \;|\; max(x)
+\\
+T_{bag} ::= &\ \bagone{}\;|\;\bagone{a} \;|\;x \;|\; x \cup y \;|\; x \cap y\;|\; x \setminus y\;|\; x \uplus y
+\end{align*}
+\end{mydef}
+
+The examples~(\ref{ex1nnf})--(\ref{ex3nnf}) are semi-equivalent with the following formulas in $\QFBILIA_{pure}$:
+\begin{align}
+\big((a \notin x) \lor (z_1 \subseteq z_2)\big) \land (\bagone{a} = z_1) \land (z_2 = (x\cup y))
+\label{ex1pure}
+\\[2mm]
+\begin{array}{l}
+\big((b_1 \neq 1) \lor (b_2<b_3)\big) \land \big((b_1 = 1) \lor (b_2 < b_4)\big) \\
+\land (b_1 = \min(x)) \land (b_2 = \max(x)) \land (b_3 = \min(y)) \land (b_4 = \min(z))
+\end{array}
+\label{ex2pure}
+\\[2mm]
+(b_1 \neq 0) \lor \big((x = \bagone{}) \lor (b_1 \neq 0)\big)
+\land (b_1 = \min(x))
+\label{ex3pure}
+\end{align}
+We might loose equivalency between formula due to the creation of variable, however semi-equivalency is preserved.
+
+Proposition~\ref{prop:pure} (Section~\ref{ssec:dp-s2}) states that $\QFBILIA_{pure}$ and $\QFBILIA_\nnf$ have the same expressive power.

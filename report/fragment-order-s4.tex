@@ -1,0 +1,48 @@
+
+
+\begin{figure}
+\begin{mdframed}
+  \fontsize{9}{6}
+%\begin{align*}
+% f1,f2 \in F,S4(F_1 \land F_2) \triangleq &\ \   S4(f1) \land S4(f2) \\
+% f1,f2 \in F,S4(F_1 \lor F_2)  \triangleq &\ \   S4(f1) \lor S4(f2)
+%\end{align*}
+%
+Translation of mixed atoms:
+%J'ai un soucis le V_{int}(\tilde{F}^3)}{\bigwedge} car c'est faut il va itéré sur les w aussi :s
+%Mais V^3_{int} n'existe pas :s ou je sais pas :s
+\begin{align*}
+ S4_{\textit{uf}}(m = max(x))  \triangleq &\ \   \left((m = m_{\bot}) \land \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0)\right) \lor
+ \\ & \ \  \left((m \neq m_{\bot}) \land (m \neq m_{\top}) \land (G_{x}(m) \ge 1) \land \underset{t\in V^3_{ele}}{\bigwedge}((t \le m)  \lor (G_{x}(t) = 0))\right)
+\\
+  S4_{\textit{uf}}(m = min(x))  \triangleq &\ \   \left((m = m_{\top}) \land \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0)\right) \lor
+  \\ & \ \  \left((m \neq m_{\bot}) \land (m \neq m_{\top}) \land (G_{x}(m) \ge 1) \land \underset{t\in V^3_{ele}}{\bigwedge}((t \ge m)  \lor (G_{x}(t) = 0))\right)
+\\
+  S4_{\textit{uf}}(a \in x )    \triangleq &\ \   G_{x}(a) \ge 1 \\
+  S4_{\textit{uf}}(a \in^{n} x) \triangleq &\ \   G_{x}(a) \ge n \\
+  S4_{\textit{uf}}(a \notin x ) \triangleq &\ \   G_{x}(a) = 0 \\
+  S4_{\textit{uf}}(a \notin^{n} x )  \triangleq &\ \   G_{x}(a) < n \\
+ S4_{\textit{uf}}(m \in x )    \triangleq &\ \   (m = m_{\bot} \lor m = m_{\top}) \land \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0) \lor G_{x}(m) \ge 1 \\
+ S4_{\textit{uf}}(m \in^{n} x) \triangleq &\ \   m \neq m_{\bot} \land m \neq m_{\top} \land G_{x}(m) \ge n \\
+ S4_{\textit{uf}}(m \notin x ) \triangleq &\ \   (m \neq m_{\bot} \land m \neq m_{\top}) \lor \underset{t\in V^3_{ele}}{\bigvee}(G_{x}(t) \neq 0) \land G_{x}(m) = 0 \\
+ S4_{\textit{uf}}(m \notin^{n} x )  \triangleq &\ \   m = m_{\bot} \lor m = m_{\top} \lor G_{x}(m) < n
+\end{align*}
+
+Translation of bag atoms:
+
+\begin{align*}
+ S4_{\textit{uf}}(x = y)           \triangleq &\ \   \underset{t \in V^3_{ele}}{\bigwedge}(G_{x}(t) = G_{y}(t))   \\
+ S4_{\textit{uf}}(x \subseteq y)   \triangleq &\ \   \underset{t \in V^3_{ele}}{\bigwedge}(G_{x}(t) \le G_{y}(t))   \\
+ S4_{\textit{uf}}(x \neq y)        \triangleq &\ \   G_{x}(a_{x \neq y}) \neq G_{y}(a_{x \neq y})   \\
+ S4_{\textit{uf}}(x \nsubseteq y)  \triangleq &\ \   G_{x}(a_{x \nsubseteq y}) > G_{y}(a_{x \nsubseteq y})   \\
+ S4_{\textit{uf}}(x = \bagone{} )  \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0)  \\
+ S4_{\textit{uf}}(x = \bagone{a})  \triangleq &\ \   (G_{x}(a) = 1)  \land \underset{t\in V^3_{ele}}{\bigwedge}((a = t) \lor (G_{x}(t) = 0))    \\
+ S4_{\textit{uf}}(x = y \cup z)    \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = max(G_{y}(t),G_{z}(t)))   \\
+ S4_{\textit{uf}}(x = y \cap z)    \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = min(G_{y}(t),G_{z}(t)))   \\
+ S4_{\textit{uf}}(x = y \uplus z)   \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = G_{y}(t)+G_{z}(t))   \\
+ S4_{\textit{uf}}(x = y \setminus z) \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = \max(0,(G_{y}(t)-G_{z}(t))))
+\end{align*}
+\caption{Translation of mixed and bags atoms}
+\label{fig:SU4}
+\end{mdframed}
+\end{figure}

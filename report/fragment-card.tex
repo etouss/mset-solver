@@ -1,0 +1,31 @@
+%!TEX root = main.tex
+
+\section{Decision procedure for the fragment with cardinality}
+%\label{sec:fcard}
+
+idée :
+\\ Soit $a_{i} \in \nu_{int}$
+\\
+$CardX_{0} = X(a_{0})$
+\\
+$\forall a_{i} \in \nu_{int} \; [(\bigwedge_{j<i} a_{j} \neq a_{i}) \Rightarrow (CardX_{i} = CardX_{i-1} + X(a_{i}))]$
+\\
+$\forall a_{i} \in \nu_{int} \; \bigwedge_{j<i} [(a_{i} = a_{j}) \Rightarrow (CardX_{i} = CardX_{i-1}]$
+\\
+$CardX_{n} \leq |x|$
+\\
+Complexité en $(n-1)*n$
+\\
+ou:
+\\
+$CardX_{i} = CardX_{i-1} + ite((\bigwedge_{j<i} a_{j} \neq a_{i}) \; X(a_{i}) \; 0)$
+\\
+\\
+As we are dealing with satisfasibility there might be a trick to play with inequality indeed :
+$\forall a_{i} \in \nu_{int} \; [(\bigwedge_{j<i} a_{j} \neq a_{i}) \Rightarrow (CardX_{i} = CardX_{i-1} + X(a_{i}))]$
+\\
+With
+$\forall a_{i} \in \nu_{int} \; (CardX_{i} \geq CardX_{i-1}]$
+\\
+
+\td{Fragment with ordered elements and msets and cardinality.}

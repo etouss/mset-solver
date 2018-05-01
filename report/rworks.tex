@@ -1,0 +1,60 @@
+%!TEX root = main.tex
+
+\section{Procedures for Solving Multiset Constraints}
+\label{sec:rworks}
+
+Decidabulity and complexity studies:
+\cite{DBLP:conf/csl/AikenKVW93},
+\cite{DBLP:journals/scp/OliveiraDF12},
+\\Heavily inspired by Zarba's papers our implementation is a reduction to int
+of his decision procedure
+
+\\Zarba's decision procedure is Non-Deterministic due to the guessing of an R equivalence relationship
+between every Int variable of your formula. Such R must be an extension of = relationship.
+An easy calculation show there are at most $2^{(n-1) \times n \div 2}$ possible R relationship where $n$ is the
+number of int variable.
+\\However we notice that R is only use to rewrite $\llbracket d \rrbracket$ in deed it become :
+\\ $ \underset{not\;(a\; R\; d)}{\bigwedge} count(\llbracket d \rrbracket,a) = 0$
+\\As R only constraint is to respect equality constraints it seems to be possible to rewrite it:
+\\ $ \underset{i<=n}{\bigwedge} (a_{i} \neq d \rightarrow count(\llbracket d \rrbracket,a_{i}) = 0)$
+\\It might just move the probleme to QF\_UFLIA decision procedure, however heuristic to determine a good
+relationship between Integer are much more efficient in this theory
+
+\\As an input we have a formula of type:
+\\ $(\underset{I}{\bigwedge}p_{i} \wedge \underset{N}{\bigwedge}(\neg\underset{J}{\bigwedge}q_{j}))$
+which is equivalent to : $(\neg(\underset{N}{\bigvee}(\underset{I}{\bigwedge}p_{i}\Rightarrow\underset{J}{\bigwedge}q_{j}))$
+\\where $p_{i}$ and $q_{j}$ are formula without $\wedge$ or $\vee$
+\\ We can express every constraints in such form if we split the problem in deed:
+\\ if $p_{i}$ or $q_{i}$ contain a $\wedge$ we just "cut it in half "
+\\ if $p = a \vee b$ then $(\bigwedge p_{i} \wedge (a\vee b) \rightarrow \bigvee(\bigwedge q_{i})) \equiv (\bigwedge p_{i} \wedge a \rightarrow \bigvee(\bigwedge q_{i}) \wedge \bigwedge p_{i} \wedge b \rightarrow \bigvee(\bigwedge q_{i}))$
+\\ if $q = a \vee b$ then $\bigwedge p_{i} \rightarrow (\bigwedge q_{i} \wedge (a \vee b)) \equiv \bigwedge p_{i} \rightarrow ((\bigwedge q_{i} \wedge a) \vee (\bigwedge q_{i} \wedge b))$
+\\
+\\
+\\ We notice that the main complexity issue come from $\exists$ in $q_{j}$ in deed if we have :
+$\neg(\underset{J}{\bigwedge}q_{j} \wedge (\exists x q(x)))$ we can't apply our small model property directly
+instead we have to apply : $\neg(\underset{J}{\bigwedge}q_{j} \wedge (\exists x q(x))) \Rightarrow \forall x (\neg(\underset{J}{\bigwedge}q_{j} \wedge q(x)))$
+and now we can use our small model property, however it cost a lot, indeed if $n$ is the number of int variable.
+Then $\underset{J}{\bigwedge}q_{j}$ will be duplicate $n$ times
+\\ Moreover $(\exists x p(x)) \Rightarrow v$ in $p_{i}$ create an issue too as we can't apply small model either
+instead it become :  $\forall x (p(x) \Rightarrow v)$
+
+\\
+\\ In our theorie existential constraint are $\nsubseteq$ and $\neq$
+
+% \\Decision procedures for some fragments:
+% \cite{DBLP:conf/csl/KuncakPS10,DBLP:conf/cade/PiskacK10},
+% \cite{DBLP:conf/sigsoft/KapurMZ06},
+% \\We are based upon an existing QF\_UFLIA decision procedure (Quantifier Free Uninterpreted Fonction Linear Arithmetic)
+% Why ?? We can translate every thing to QF\_LIA theory the only things we loose is on $a = b$ constraints where $a,b \in \nu_{int}$
+% Or we can add $|\nu_{int}|*(|\nu_{int}| - 1) * |\nu_{bag}| \div 2$ constraints to match it
+% \\
+% $(a = b) \Rightarrow \bigwedge_{x \in \nu_{bag}} \; xnba = xnbb $
+% \\
+% Where $xnba$ are newly created variable which represent $X(a)$ however due to the loose of dynamic
+% interpretation we have to add those previous constraints
+% \\
+% Warning : $xnba \notin \nu_{int}$ of course they are int but they aren't element that we have to deal with in bags.
+% Maybe have to change names ...
+%
+% \\Existing tools:
+% \\Z3, CVC4

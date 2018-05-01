@@ -1,0 +1,131 @@
+\section{Implementation}
+\label{sec:implementation}
+To obtain efficient solving times, we implemented several optimisation of the procedures described in the previous section.
+We describe these optimisations in the next subsections.
+It is important to understand that our decision procedure being based upon an SMT solver, we want our output formula to be as friendly as possible.
+However, we try to keep our computation time as small as possible too.
+The challenge is to understand when we should increase our computation time in order to decrease the computation time of SMT solvers.
+As shown by our benchmark, the SMT solvers are very efficient when dealing with standards operations (for instance, convert a formula in CNF), hence we do not modify our formula form.
+However SMT solvers computation time increases with the number of atoms in the input formula. As a consequence it is interesting to reduce this number by
+our reduction procedure, if it does not increase too much our computation time (see Section \ref{ssec:bench}).
+
+\subsection{Unitary Bag Optimisation}
+Many atoms are added in steps 2-4 due to $L_{bag}$ and $L_{mix}$; more precisely, their number is linear in the number of variable in $V_{int}$ and $V_{bag}$.
+To reduce this number, we rewrite the formulas in the left side below to the right side formulas which add less variables and conjunctions in steps 2-4:
+\begin{center}
+\begin{tabular}{lcl}
+  $\bagone{a} \subseteq x$ & $\sim_{\mathit{sat}}$ & $a \in x$ \\
+  $\bagone{a} \nsubseteq x$ & $\sim_{\mathit{sat}}$ & $a \notin x$ \\
+  $max(\bagone{a})$ & $=$ & $a$ \\
+  $min(\bagone{a})$ & $=$ & $a$ \\
+\end{tabular}
+\end{center}
+In $S4$,  $a \in x$ does not add any conjunction to the formula, hence the output have fewer atoms than the equi-satisfiable one with $\bagone{a} \subseteq x$.
+As $a \notin x$ does not add any variable to $V_{int}$ fewer atoms will be conjuncted during $S4$ than with $\bagone{a} \nsubseteq x$
+Same can be said about $max(\bagone{a})$ and $min(\bagone{a})$ where step 2 adds a fresh variable to $V_{int}$ and step 4 conjuncts many atoms.
+%In conclusion, it might be interesting to rewrite those atoms.
+Notice that the rewriting can be done without any increase of computation time, as it is just a different rewriting of an already existing literal.
+
+\subsection{Bag variables creation}
+In step 2.4, every bag atom $L_{bag}$ of $\tilde{F}_{2.3}$ using more than two bag variables for operations $\neq, \subseteq, \nsubseteq$ and more than three variables for operation $=$ are iteratively rewritten to be reduced to the bag atoms in $\QFBILIA_{pure}$.
+However, this rewriting adds many bag variable which cost a lot of computation time, as we will have to deal with more bags.
+Let define a function $apply : (T_{bag},V_{int}) \rightarrow T_{int}$ by:
+\begin{flalign}
+  apply(x,a)  &=    w_{a,x}    \\
+  apply(T_{bag}^1 \cup T_{bag}^2,a)  &=  max(apply(T_{bag}^1,a),apply(T_{bag}^2,a))    \\
+  apply(T_{bag}^1 \cap T_{bag}^2,a)  &=  min(apply(T_{bag}^1,a),apply(T_{bag}^2,a))    \\
+  apply(T_{bag}^1 \uplus T_{bag}^2,a)  &=  apply(T_{bag}^1,a)+apply(T_{bag}^2,a)    \\
+  apply(T_{bag}^1 \setminus T_{bag}^2,a)  &=  max(0,apply(T_{bag}^1,a)-apply(T_{bag}^2,a))    \\
+\end{flalign}
+Then we can extend S4:
+$$S4(T_{bag}^1 = T_{bag}^2) \triangleq \underset{t \in V^3_{ele}}{\bigwedge}(apply(T_{bag}^1,t) = apply(T_{bag}^2,t))$$
+while preserving equi-satisfiability.
+Same can be done for $\neq, \subseteq, \nsubseteq$ operators.
+This rewriting allows us to skip the step 2.4.
+
+\subsection{Integer Element Optimisation}
+A \QFBILIA\ formula might have pure integer variables, i.e., integer variables that are not involve in any bag, mix or extremum literals.
+Such variable does not have to be consider during the counting abstraction as they do not constrain any bag, hence we can reduce the cardinal of $V^3_{ele}$
+
+\begin{mydef}
+  Let a formula $F$ in \QFBILIA\ let two variable $u$, $v$ in $V_{int}(F)\cup V_{bag}(F)$ then $u$ operate with $v$, denote
+  $u \backsimeq v$, iff exists $l$ in $L(F)$ where $u$ and $v$ are in $V_{int}(l) \cup V_{bag}(l)$.
+  $$u \backsimeq v \Longleftrightarrow \exists l \in L(F), u,v \in V_{int}(l)\cup V_{bag}(l)$$
+\end{mydef}
+\begin{mydef}
+  Let a formula $F$ in \QFBILIA\ , $V_{ope}(F)$ is the set of integer variable:
+  $$V_{ope}(F) = \left\{a \in V_{int}(F) | \exists x \in V_{bag}(F), a \backsimeq y \right\}\cup V_{ext}$$
+  and
+  $$<V_{ope}(F)> = \left\{a \in V_{ope}(F) | \exists b \in V_{ope}(F), a \backsimeq b \right\}$$
+\end{mydef}
+
+\begin{myprop}
+If $V^3_{ele}$ is redefined (step 3-4) as :$V^3_{ele} = <V_{ope}(F)>$ then
+(i) Property 3 is still valid, and
+(ii) Property 4 is  still valid.
+\end{myprop}
+
+\begin{proof}
+The proof is the same as before because the only difference is the absence of useless $w$.
+\end{proof}
+
+
+% Our decision procedure being based on Bags of integer and linear integer arithmetic, the integer variable $V_{int}(F)$ of the formula
+% can be split in 2 different type. Let us denote $V_{ele}(F)$ the set of integer variable that interact with bags in $F$.
+% It's important to understand that $V_{ele}(F)$ contains any integer variable that interact directly with bags thanks to $L_{mix}$ atoms
+% but also any integer variable which interact with an element form $V_{ele}(F)$ thanks to $L_{int}$ atoms.
+% ie, $V_{ele}(F)$ is closed for $L_{int}$ atoms.
+% Finally $V_{ele}(F)$ can be use during step 3 and 4, indeed we can apply the count abstraction only amoung those integer
+% without loosing the equi-satisfiability property.
+% \\Such $V_{ele}(F)$ have to be construct thanks to an union-find algorithm. Hence if the input formula doesn't contain any integer which isn't in $V_{ele}(F)$
+% our compution time increases without any benefit for the output formula. For this we implemented an option in the programme to enable or disable it.
+
+\subsection{Benchmark}
+\label{ssec:bench}
+
+Our solvers takes as input problems written in the SMTLIB format~\cite{SMTLIB10} for the theory of bags and sets.
+
+We applied it on a benchmark of 295 problems generated from verification conditions generated by~\cite{enea2014compositional}
+for programs manipulating data structures
+like lists, binary search trees, AVL, skip lists,\ldots.
+All problems take less than 1 sec to be reduced to the base theory (QFLIA or QFUFLIA).
+%
+%Z3
+%CVC4
+%API Z3
+%Int element opti
+%UFLIA
+%LIA
+
+% During the third and fourth steps of the descion procedure we didn't take into account that the formula
+% $\tilde{F}^2$ might have integer variable that don't participate in any
+
+
+% In order to understand this section we have to considerate the cost of each step and identify from where that cost come from.
+% %\label{sec:fimpl}
+% \subsection{Translation to \QF_BILIA\ Complexity}
+% The complexity of the nnf function is linear among atoms of the formula indeed we only have to treat each of them once.
+% However as we see, rewritting of ite terms duplicate the condition.
+% As a conclusion we should avoid ite as much as possible as their rewritting cost a lot.
+%
+% \subsection{Translation to $\QFBILIA_{pure}$ Complexity}
+% Once again each atoms of the formula will be treat once then it's linear.
+%
+% \subsection{Counting Abstraction Complexity}
+% This step is expensive, indeed we have to add a variable for each bag and for each
+%
+%
+% It's easy to notice that their is a difference in our algorithm between the rewritting of the following formula
+% which are equi-satisfiable.
+% \begin{align}
+% \bagone{a} \subseteq x & \sim_{\mathit{sat}} & a \in x \\
+% \end{align}
+% In order to optimise we can rewrite many $\llbracket a \rrbracket$ constraint to avoid costly operation:
+% \begin{center}
+% \begin{tabular}{l c l}
+% $\llbracket a \rrbracket \subseteq x$ & $\Rightarrow$ & $a \in x$\\
+% $\llbracket a \rrbracket \nsubseteq x$ & $\Rightarrow$ & $a \notin x$\\
+% $min(\llbracket a \rrbracket)$ & $\Rightarrow$ & $a$\\
+% $max(\llbracket a \rrbracket)$ & $\Rightarrow$ & $a$\\
+% \end{tabular}
+% \end{center}

@@ -1,0 +1,361 @@
+%!TEX root = main.tex
+
+\section{Decision procedure by reduction to \textsf{QFUFLIA}}
+\label{sec:forder}
+
+%The previous section described a decision procedure for a formula in \QFBILIA\ in order to obtain an equi-satisfiable formula in QFLIA.
+This section describes a reduction to \QFBILIA\ formulas to an equi-satisfiable formula in quantifier free linear arithmetics with uninterpreted functions QFUFLIA.
+The first two steps of the procedure are identical to the previous one as a consequence we consider a formula $\tilde{F}^2$ as input.
+The third step introduces two extremum variables to represent $\bot$ and $\top$, a set of fresh integer variables and a set of uninterpreted function variables to represent
+(i) the elements that validates atoms $x\neq y$ and $x\nsubseteq y$ and
+(ii) for each multi-set variable $x\in V_{bag}(\tilde{F}^2)$ uninterpreted function variables
+$G_{x}$ such as for each integer variable $a\in V_{int}(\tilde{F}^2)$, $G_{x}(a)$ is counting the occurrences of values of $a$ in $x$.
+This step only adds to $\tilde{F}^2$ a formula $F_3$ over integer variables and uninterpreted function. The formula $\tilde{F}^2 \land F_3$ is then equi-satisfiable to $F$.
+The fourth step removes multi-set terms from $\tilde{F}^3$ using the fresh uninterpreted function variables introduced by the counting abstraction and produces a formula $\tilde{F}^4 \land F_3$ equi-satisfaisable to $F$.
+
+
+\subsection{QFBILIAUF Syntax}
+\label{ssec:synUF}
+
+% We use the classic notations for operations over $\ZZ$.
+% Integer constants are denoted by $k$, natural ones by $n$.
+% Let $V_{int}=\{a,b,c,\ldots\}$ be a finite set of symbols denoting integer variables, i.e., variables with values in $\ZZ$.
+Let $V_{\textit{uf}}=\{G,H,\ldots\}$ be a finite set of symbols denoting uninterpreted function variables, i.e., variables with values in $\ZZ \rightarrow \ZZ$.
+% We denote by $\MM[\ZZ]$ the domain of bags over integers, i.e.,the set of functions $\ZZ\flc\NN$.
+% Let $V_{bag}=\{x,y,z,\ldots\}$ be a finite set of symbols denoting bag variables, i.e., variables with values in $\MM[\ZZ]$.
+We suppose that $V_{int}$, $V_{ext}$, $V_{\textit{uf}}$ and $V_{bag}$ are disjoint and we do not write explicitly the type ($\ZZ$, $\ZZ^{\prec}$, $(\ZZ \rightarrow \ZZ)$ or $\MM[\ZZ]$) of each variable,
+where $V_{int}$, $V_{ext}$ and $V_{bag}$ are defined as in the previous section.
+
+\begin{mydef}
+A QFBILIAUF\ formula $F$ is defined by the following grammar:
+\begin{align*}
+F ::= &\ L \; | \; F\lor F \; | \; F\land F \; | \; \lnot F \; | \; F\limp F
+& \textit{formula}
+\\
+L ::= &\ L_{int} \; |\; L_{bag} \; |\; L_{mix} \; |\; L_{ext}
+& \textit{boolean atom}
+\\
+L_{int} ::= &\ T_{int} = T_{int} \; |\; T_{int} \neq T_{int} \; |\; T_{int} < T_{int}\; |\;  T_{int} \ge T_{int}
+\\
+L_{ext} ::= &\ T_{ext} = T_{ext} \; |\; T_{ext} \neq T_{ext} \; |\; T_{ext} < T_{ext}\; |\;  T_{ext} \ge T_{ext}
+\\
+L_{bag} ::= &\ T_{bag} = T_{bag} \; |\;T_{bag} \neq T_{bag} \; |\;
+T_{bag} \subseteq T_{bag} \; |\;T_{bag} \nsubseteq T_{bag} \; | \;
+\\
+&\ T_{bag} < T_{bag} \; |\;T_{bag} \ge T_{bag}
+\\
+L_{mix} ::= &\ a \in T_{bag}\; |\;a \notin T_{bag}\; |\;a \in^{n} T_{bag}\; |\;a \notin^{n} T_{bag}
+\\
+T_{int} ::= &\  k \;|\; a \;|\; T_{\textit{uf}} \;|\;  T_{int} + T_{int} \;|\; T_{int} - T_{int}\;|\;
+& \textit{integer term}
+\\
+&\ \max(T_{int},T_{int})\;|\; \min(T_{int},T_{int}) \;|\; \ite(F,T_{int},T_{int})
+\\
+T_{ext} ::= &\ k \;|\; m \;|\; \min(T_{bag}) \;|\; \max(T_{bag}) \;|\; \ite(F,T_{ext},T_{ext})
+& \textit{extremum term}
+\\
+T_{\textit{uf}} ::= &\ G(T_{int})
+&\textit{UF term}
+\\
+T_{bag} ::= &\ \bagone{}\;|\;\bagone{a} \;|\;x \;|\; T_{bag} \cup T_{bag} \;|\; T_{bag} \cap T_{bag} \;|\;
+& \textit{bag term}
+\\
+&\ T_{bag} \setminus T_{bag}\;|\; T_{bag} \uplus T_{bag} \;|\; \ite(F,T_{bag},T_{bag})
+\\
+\end{align*}
+
+We denote by by $\cT_{\textit{uf}}$ the set of uninterpreted function terms.
+\end{mydef}
+
+For a formula $F$, we denote by $V_{\textit{uf}}(F)$ the set of uninterpreted function variables used in $F$.
+\subsection{QFBILIAUF Semantics}
+\label{ssec:semUF}
+A valuation $I_{\textit{uf}}$ of variables in $V_{\textit{uf}}$ is a function mapping variables in $V_{\textit{uf}}$ to values in $(\ZZ \rightarrow \ZZ)$, i.e.,
+$I_{\textit{uf}} \; : \; V_{\textit{uf}} \flc (\ZZ \rightarrow \ZZ)$.
+A valuation $I$ of variables in $V_{int}\cup V_{\textit{uf}} \cup V_{bag} \cup V_{ext}$ is a tuple of valuations $(I_{int}, I_{\textit{uf}}, I_{bag}, I_{ext})$;
+we denote by $I_{int}$, $I_{\textit{uf}}$, $I_{bag}$ and $I_{ext}$ the first, resp. second, resp. third, resp. fourth component of a valuation $I$.
+Let $\cI$ be the set of valuations over variables in $V_{int}\cup V_{\textit{uf}} \cup V_{ext} \cup V_{bag}$.
+The semantics of QFBILIAUF is defined by
+\begin{itemize}
+\item a function $\ ^*: \cI\flc \cT_{int}\flc \ZZ$ mapping a valuation and an integer term to an integer value,
+\item a function $\ ^\square: \cI\flc \cT_{\textit{uf}}\flc \ZZ $ mapping a valuation and an uninterpreted function term to an integer value,
+\item a function $\ ^\circ: \cI\flc \cT_{bag}\flc \MM[\ZZ]$ mapping a valuation and a multi-set term to a multi-set value,
+\item a function $\ ^{\bullet}: \cI\flc \cT_{ext}\flc \ZZ\cup\{\bot,\top\}$ mapping a valuation and an integer term to an extremum value,
+\item a relation $\ \models \subseteq \cI\times \cF$ between valuations and formulas.
+\end{itemize}
+$I^{*}$, $I^{\bullet}$ and $I^{\circ}$ have the same definition as in \QFBILIA, see section \ref{ssec:sem}.
+\\
+Given a valuation $I$ and an uninterpreted function term $T_{\textit{uf}}$, the valuation of $T_{\textit{uf}}$ in $\ZZ$,
+denoted by $I^{\square}(T_{\textit{uf}})$, is defined as follows:
+\begin{align*}
+I^{\square}(G(T_{int})) \triangleq&\ I_{\textit{uf}}(G)(I^*(T_{int})) \\
+\end{align*}
+
+\begin{mydef}
+  A QFBILIAUF formula $F$ is \emph{satisfiable} if there exists a valuation $I$, called also its model, such that $I \models F$.
+\end{mydef}
+
+\subsection{Third Step: Introducing the Counting Abstraction}
+This step adds to $\tilde{F}^2$ a formula $F_3$ that allow to introduce the uninterpreted functions variable that will replace the multi-set ones. The transformation has three steps:
+
+\begin{enumerate}
+\item[$S_u$3.1:] Build the set $V^{31}_{int}$ as a set of fresh variables, one variable for each atom $(x \neq y)$ or $(x \nsubseteq y)$ in $\tilde{F}^2$.
+We denote these variables by $a_{x \neq y}$, resp. $a_{x \nsubseteq y}$.
+Intuitively, these variables are introduced to be able to express the fact that there is a value on which $x$ and $y$ differ, resp. $x$ has more copies than $y$.
+see subsection \ref{subsec:rewritting qfuflia}.
+
+\item[$S_u$3.2:] We introduce two fresh extremum variables $m_{\bot}$ and $m_{\top}$.
+Intuitively, these variables are introduced to be able to express $\bot$, resp. $\top$.
+
+\item[$S_u$3.3:] Build the set
+$$V_{\textit{uf}}  =
+\bigcup_{x\in V_{bag}(\tilde{F}^2)} G_{x},$$
+where an uninterpreted variable $G_{x}$ is added for each bag variable $x$ in order to represent the bag $x$.
+Let $V^3_{int} = V_{int}(\tilde{F}^2) \cup V^{31}_{int}$.
+Let $V^3_{ele} = V^3_{int} \cup V_{ext}(\tilde{F}^2)$.
+
+The formula $\tilde{F}^3$ is built as follows:
+\begin{align}
+  \tilde{F}^3 \triangleq &\
+  \tilde{F}^2 \land F_{3} \\
+  F_{3 } \triangleq &\
+  \left(\bigwedge_{a \in V^{3}_{int}}(m_{\bot} < a < m_{\top})\right)
+  \\
+  & \land
+  \left(\bigwedge_{m \in V_{ext}(\tilde{F}^2)}(m_{\top} \ge m \ge m_{\bot})\right)
+  \\
+  & \land
+  %\bigwedge_{x \in V_{bag}(\tilde{F}^2)}\left(\land_{a\in V^3_{int}}w_{a,x} \ge 0\right)  WRONG DU TO w_{w_a,x,x}
+  \left(\bigwedge_{t \in V^3_{ele},x \in V_{bag}}(G_{x}(t) \ge 0)\right)
+  \\
+\end{align}
+The set of variables of $\tilde{F}^3$ are $V_{int}(\tilde{F}^3)$, resp. $V_{\textit{uf}}$, resp. $V_{bag}(\tilde{F}^2)$.
+\end{enumerate}
+
+The following property states that $\tilde{F}^3 \sim_{sat} \tilde{F}^2$:
+\begin{myprop}
+\label{prop:countabs}
+(i) any model of $\tilde{F}^3$ is a model of $\tilde{F}^2$ and
+(ii) for any model of $\tilde{F}^2$, there is a model of $\tilde{F}^3$ that agrees on $V_{int}(\tilde{F}^2)$ and $V_{bag}(\tilde{F}^2)$.
+\end{myprop}
+
+\begin{proof}
+
+Because $\tilde{F}^3 \triangleq \tilde{F}^2 \land F_{3}$, any model $I$ of $\tilde{F}^3$ is also a model of $\tilde{F}^2$.
+
+We prove now the point (ii):
+\begin{enumerate}
+\item[A.1:] $I$ be a model of $\tilde{F}^2$
+\item[C.1:] There is $I'$ which agrees on $V(\tilde{F}^2)$ to $I$ and $I'$ is a model of $\tilde{F}^3$.
+\end{enumerate}
+Proof:
+\begin{enumerate}
+\item[1:] Let $I'=(I_{bag}, I_{int},I'_{\textit{uf}})$ such that for any $G_{x}\in V_{\textit{uf}}(\tilde{F}^3)$ and for any $k \in \ZZ$ we have
+$$
+I'_{\textit{uf}}(G_{x})(k) \triangleq \left\{
+\begin{array}{ll}
+I_{bag}(x)(a) & \mbox{ if }  I_{int}(a) = k \mbox{ for some } a \in V_{int}(\tilde{F}^2) \\
+I_{bag}(x)(m) & \mbox{ if }  I_{ext}(m) = k \mbox{ for some } m \in V_{ext}(\tilde{F}^2) \\
+I_{bag}(x)(v) & \mbox{ if }  I_{int}(a_{x\neq y}) = k \mbox{ for some }a_{x\neq y} \in V^{31}_{int} \\
+& \quad \mbox{ and } I_{bag}(x)(v) \neq I_{bag}(y)(v)\\
+I_{bag}(x)(v) & \mbox{ if }  I_{int}(a_{x\nsubseteq y}) = k \mbox{ for some }a_{x\nsubseteq y} \in V^{31}_{int} \\
+& \quad \mbox{ and } I_{bag}(x)(v) > I_{bag}(y)(v)\\
+0 & \mbox{ otherwise}\\
+%I_{bag}(x)(b) & \mbox{ if } a \equiv w_{b,x} \in V^{32}_{int}
+\end{array}\right.
+$$
+for any $m\in V_{ext}(\tilde{F}^3)$ we have
+$$
+I'_{ext}(m) \triangleq \left\{
+\begin{array}{ll}
+I_{ext}(m) & \mbox{ if } m \in V_{ext}(\tilde{F}^2) \\
+k & \mbox{ if } m_{\bot} \mbox{ and } \forall a \in V_{int}(\tilde{F}^3), k<I'_{int}(a) \\
+& \quad\quad\quad\mbox{ and } \forall m \in V_{ext}(\tilde{F}^3), k\leq I'_{ext}(m)\\
+k & \mbox{ if } m_{\top} \mbox{ and } \forall a \in V_{int}(\tilde{F}^3), k>I'_{int}(a) \\
+& \quad\quad\quad\mbox{ and } \forall m \in V_{ext}(\tilde{F}^3), k\geq I'_{ext}(m)\\
+\end{array}\right.
+$$
+
+This valuation of integer and extremum variables satisfies the part $\tilde{F}^2$ of $\tilde{F}^3$ by (A.1)
+and it satisfies the $F_{3}$ part by the properties of $I_{bag}$.
+Thus, C.1. is satisfied.
+\end{enumerate}
+\end{proof}
+
+\subsection{Fourth Step: Removing Multi-set Constraints}
+\label{subsec:rewritting qfuflia}
+This step rewrites the bag atoms and the mixed atoms in order to remove the bag terms as so transform $\tilde{F}^3$ to a formula in QFUFLIA.
+The transformation preserves the boolean structure of the initial formulas and the integer atoms.
+It is given by the $S4_{\textit{uf}}$ function defined in Figure~\ref{fig:SU4}.
+
+\begin{figure}
+\begin{mdframed}
+  \fontsize{9}{6}
+%\begin{align*}
+% f1,f2 \in F,S4(F_1 \land F_2) \triangleq &\ \   S4(f1) \land S4(f2) \\
+% f1,f2 \in F,S4(F_1 \lor F_2)  \triangleq &\ \   S4(f1) \lor S4(f2)
+%\end{align*}
+%
+Translation of mixed atoms:
+%J'ai un soucis le V_{int}(\tilde{F}^3)}{\bigwedge} car c'est faut il va itéré sur les w aussi :s
+%Mais V^3_{int} n'existe pas :s ou je sais pas :s
+\begin{align*}
+ S4_{\textit{uf}}(m = max(x))  \triangleq &\ \   \left((m = m_{\bot}) \land \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0)\right) \lor
+ \\ & \ \  \left((m \neq m_{\bot}) \land (m \neq m_{\top}) \land (G_{x}(m) \ge 1) \land \underset{t\in V^3_{ele}}{\bigwedge}((t \le m)  \lor (G_{x}(t) = 0))\right)
+\\
+  S4_{\textit{uf}}(m = min(x))  \triangleq &\ \   \left((m = m_{\top}) \land \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0)\right) \lor
+  \\ & \ \  \left((m \neq m_{\bot}) \land (m \neq m_{\top}) \land (G_{x}(m) \ge 1) \land \underset{t\in V^3_{ele}}{\bigwedge}((t \ge m)  \lor (G_{x}(t) = 0))\right)
+\\
+  S4_{\textit{uf}}(a \in x )    \triangleq &\ \   G_{x}(a) \ge 1 \\
+  S4_{\textit{uf}}(a \in^{n} x) \triangleq &\ \   G_{x}(a) \ge n \\
+  S4_{\textit{uf}}(a \notin x ) \triangleq &\ \   G_{x}(a) = 0 \\
+  S4_{\textit{uf}}(a \notin^{n} x )  \triangleq &\ \   G_{x}(a) < n \\
+ S4_{\textit{uf}}(m \in x )    \triangleq &\ \   (m = m_{\bot} \lor m = m_{\top}) \land \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0) \lor G_{x}(m) \ge 1 \\
+ S4_{\textit{uf}}(m \in^{n} x) \triangleq &\ \   m \neq m_{\bot} \land m \neq m_{\top} \land G_{x}(m) \ge n \\
+ S4_{\textit{uf}}(m \notin x ) \triangleq &\ \   (m \neq m_{\bot} \land m \neq m_{\top}) \lor \underset{t\in V^3_{ele}}{\bigvee}(G_{x}(t) \neq 0) \land G_{x}(m) = 0 \\
+ S4_{\textit{uf}}(m \notin^{n} x )  \triangleq &\ \   m = m_{\bot} \lor m = m_{\top} \lor G_{x}(m) < n
+\end{align*}
+
+Translation of bag atoms:
+
+\begin{align*}
+ S4_{\textit{uf}}(x = y)           \triangleq &\ \   \underset{t \in V^3_{ele}}{\bigwedge}(G_{x}(t) = G_{y}(t))   \\
+ S4_{\textit{uf}}(x \subseteq y)   \triangleq &\ \   \underset{t \in V^3_{ele}}{\bigwedge}(G_{x}(t) \le G_{y}(t))   \\
+ S4_{\textit{uf}}(x \neq y)        \triangleq &\ \   G_{x}(a_{x \neq y}) \neq G_{y}(a_{x \neq y})   \\
+ S4_{\textit{uf}}(x \nsubseteq y)  \triangleq &\ \   G_{x}(a_{x \nsubseteq y}) > G_{y}(a_{x \nsubseteq y})   \\
+ S4_{\textit{uf}}(x = \bagone{} )  \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = 0)  \\
+ S4_{\textit{uf}}(x = \bagone{a})  \triangleq &\ \   (G_{x}(a) = 1)  \land \underset{t\in V^3_{ele}}{\bigwedge}((a = t) \lor (G_{x}(t) = 0))    \\
+ S4_{\textit{uf}}(x = y \cup z)    \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = max(G_{y}(t),G_{z}(t)))   \\
+ S4_{\textit{uf}}(x = y \cap z)    \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = min(G_{y}(t),G_{z}(t)))   \\
+ S4_{\textit{uf}}(x = y \uplus z)   \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = G_{y}(t)+G_{z}(t))   \\
+ S4_{\textit{uf}}(x = y \setminus z) \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(G_{x}(t) = \max(0,(G_{y}(t)-G_{z}(t))))
+\end{align*}
+\caption{Translation of mixed and bags atoms}
+\label{fig:SU4}
+\end{mdframed}
+\end{figure}
+
+\begin{myprop}
+\label{prop:final}
+The formula $\tilde{F}^4 = S_{u}4(\tilde{F}^3)$ is in QFUFLIA and
+%De meme suis pas sure se soit vrai du tout. on doit imposer la creation que l'on souhaite
+(i) any model of $\tilde{F}^3$ is a model of $\tilde{F}^4$ and
+(ii) for any model of $\tilde{F}^4$, there is a model of $\tilde{F}^3$ that agrees on $V_{int}(\tilde{F}^3)$.
+\end{myprop}
+
+\begin{proof}
+Clearly $\tilde{F}^4$ is in QFLIA from the definition of $S_{u}4$.
+
+Point (i): Because $S_{u}4$ does not rewrite integer atoms and the $F_3$ conjunct, a model $I$ of $\tilde{F}^3$ satisfies, with its integer valuation $I_{int}$, the integer atoms not rewritten by $S_{u}4$.
+The uninterpreted function atoms introduced by $S_{u}4$ are conform with the semantics of formulas while interpreting the variables $X(*)$ as counting abstractions of a bag $x$.
+If $x \neq y$ is satisfied then there exists a value $v$ in $\ZZ$ such as $I_{bag}(x)(v) \neq I_{bag}(y)(v)$. By the choice of $I_{int}$ in the 3rd step (i.e., it satisfies $F_3$), we have that $I_{int}(a_{x\neq y}) = v$
+If $m = max(x)$ is satisfied then either $I_{bag}(x) = \bagone{} $ and $I_{ext}(m) = I_{ext}(m_{\bot})$, or $I_{ext}(m)$ is the greatest integer of $\mathcal{D}(I_{bag}(x))$ but different from $I_{ext}(m_{\bot})$ and $I_{ext}(m_{\top})$.
+
+Point (ii):
+\begin{enumerate}
+\item[A.1] $I$ is a model of $S_{u}4(\tilde{F}^3)$
+\item[C.1] there is a model $I'$ of $\tilde{F}^3$ that agrees on $V_{int}(\tilde{F}^3)$
+\end{enumerate}
+
+Proof:
+\begin{enumerate}[1.]
+\item %[1.]
+$I_{int}$ satisfies the $F_3$ component of $\tilde{F}^3$ which is preserved as it is by $S_{u}4$.
+By the definition of $S_{u}4$, $V_{int}(\tilde{F}^3) = V_{int}(S_{u}4(\tilde{F}^3))$.
+
+\item %[2.]
+We define a valuation of bag variables in $\tilde{F}^3$, $I'_{bag}$ as follows:
+%Same issue V_{int}(\tilde{F}^3)
+$$
+I'_{bag}(x)(v) \triangleq \left\{\begin{array}{ll}
+I_{\textit{uf}}(G_{x})(a) & \mbox{ if } v = I_{int}(a) \mbox{ for some }a\in V^3_{int} \\
+I_{\textit{uf}}(G_{x})(m) & \mbox{ if } v = I_{ext}(m) \mbox{ for some }m\in V^3_{ext} \\
+0 & \mbox{ otherwise}
+\end{array}\right.
+$$
+Then $I'_{bag}$ is a well funded function.
+
+Proof: By the fact that $I_{\textit{uf}}$ satisfies the constraint $F_3$, which means that values of $I_{\textit{uf}}(G_{x})(*) \ge 0$.
+
+\item %[3.]
+$I'=(I_{int}(\tilde{F}^3),I'_{bag})$ is a model of $S_{u}4(\tilde{F}^3)$.
+
+Proof: The proof proceeds by induction on the form of atoms transformed by $S_{u}4$. We show only the main points of the induction, the others are done similarly.
+
+\begin{enumerate}[3.1]
+\item %[3.1:]
+for $L_{bag} ::=\ x = \llbracket a \rrbracket$, if $I \models S_{u}4(L_{bag})$ then $I'\models L_{bag}$ (and vice versa). \\
+
+\begin{enumerate}[3.1.1]
+\item %[3.1.1:]
+From definition of $S_{u}4(L_{bag})$,
+\begin{align*}
+(I_{\textit{uf}}(G_{x})(I_{int}(a)) = 1)  
+&\land \underset{b\in V^3_{int}}{\bigwedge}((I_{int}(a) = I_{int}(b)) \lor (I_{\textit{uf}}(G_{x})(I_{int}(b)) = 0)) \\
+&\land \underset{m\in V^3_{ext}}{\bigwedge}((I_{int}(a) = I_{ext}(m)) \lor (I_{\textit{uf}}(G_{x})(I_{ext}(m)) = 0)).
+\end{align*}
+
+\item %[3.1.2:]
+From 3.1.1 and the definition of $I'_{bag}$,
+\begin{align*}
+(I_{bag}(x)(I_{int}(a)) = 1)  
+&\land \underset{b\in V^3_{int}}{\bigwedge}((I_{int}(a) = I_{int}(b)) \lor (I_{bag}(x)(I_{int}(b)) = 0)) \\
+&\land \underset{m\in V^3_{ext}}{\bigwedge}((I_{int}(a) = I_{ext}(m)) \lor (I_{bag}(x)(I_{ext}(m)) = 0)).
+\end{align*}
+
+\item %[3.1.3:]
+From 3.1.2 and the definition of $I'_{bag}$,
+$$(I_{bag}(x)(I_{int}(a)) = 1) \land \underset {k\in \ZZ}{\bigwedge}((I_{int}(a) = k) \lor (I_{bag}(x)(k) = 0)).$$
+
+\item %[3.1.4:]
+From 3.1.3 the semantic 2.2 of $T_{bag}$ and $L_{bag}$,
+$$I'_{bag}(x) = \bagone{I_{int}(a)}$$.
+
+\end{enumerate}
+%usefull ? we admit in first step ?
+The reverse direction is shown similarly.
+
+Hence, 3.1 is valid.
+
+
+\item %[3.2:]
+for $L_{bag}::=\ x \neq y$, if $I \models S_{u}4(L_{bag})$ then $I'\models L_{bag}$ (and vice versa). \\
+
+\begin{enumerate}[3.2.1]
+\item %[3.1.1:]
+From definition of $S_{u}4(L_{bag})$,
+$$I_{\textit{uf}}(G_{x})(I_{int}(a_{x\neq y})) \neq I_{\textit{uf}}(G_{y})(I_{int}(a_{x\neq y}))$$.
+
+\item %[3.1.2:]
+From 3.2.1 and the definition of $I'_{bag}$,
+$$I_{bag}(x)(I_{int}(a_{x\neq y})) \neq I_{bag}(y)(I_{int}(a_{x\neq y}))$$.
+
+\item %[3.1.3:]
+From 3.2.2 and the definition of $I'_{bag}$,
+$$\exists k \in \ZZ I_{bag}(x)(k) \neq I_{bag}(y)(k)$$.
+
+\item %[3.1.4:]
+From 3.2.3 and the semantic 2.2 of $L_{bag}$,
+$$I'_{bag}(x) \neq I'_{bag}(y)$$.
+
+\end{enumerate}
+%usefull ? we admit in first step ?
+The reverse direction is shown similarly.
+
+Hence, 3.2 is valid.
+
+\end{enumerate} %% end of  3
+
+\item %[4.]
+$I'=(I_{int},I'_{bag})\models S_{u}4(\tilde{F}^3)$
+
+Proof: by 1, 2, and 3 above.
+
+
+\item %[5.]
+C.1
+
+Proof: by 4 and the definition of $I'$.
+
+\end{enumerate}
+\end{proof}

@@ -1,0 +1,20 @@
+lhs = (
+[: [ nil:void,  root0:Bst_t,  X:Bst_t,  Y:Bst_t,  parent1:Bst_t,  parent2:Bst_t,  cur1:Bst_t,  cur2:Bst_t,  M0:BagInt,  M1:BagInt,  M2:BagInt,  key:Int,  d:Int,  - ]] 
+(and 
+	(= M0 (bagunion (bag d ) M1 M2 ) )
+	(< M1 (bag d ) )
+	(< (bag d ) M2 )
+	(> d key )
+)
+) 
+==>
+rhs = (
+[: [ nil:void,  root0:Bst_t,  X:Bst_t,  Y:Bst_t,  parent1:Bst_t,  parent2:Bst_t,  cur1:Bst_t,  cur2:Bst_t,  M0:BagInt,  M1:BagInt,  M2:BagInt,  key:Int,  d:Int,  - ]] x  [0 -> 0,1 -> 1,2 -> 2,3 -> 3,4 -> 0,5 -> 1,6 -> 1,7 -> 2,8 -> 8,9 -> 9,10 -> 10,11 -> 11,12 -> 12,] 
+(and 
+	(= M0 (bagunion (bag d ) M1 M2 ) )
+	(< M1 (bag d ) )
+	(< (bag d ) M2 )
+	(=> (subset (bag key ) M0 )(subset (bag key ) M1 ))
+	(=> (subset (bag key ) M1 )(subset (bag key ) M0 ))
+)
+) 

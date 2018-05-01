@@ -1,0 +1,98 @@
+%!TEX root = paper.tex
+
+\section{Logic \QFBILIA}
+\label{app:logic}
+
+We include here the definitions omitted in Section~\ref{sec:logic}.
+
+\subsection{Semantics}
+
+%\td{bot top mais compliquer car + - a exclure etc ...}
+Given a valuation $I$ and an integer term $T_{int}$, the valuation of $T_{int}$ in $\ZZ$,
+denoted by $I^*(T_{int})$, is defined as follows:
+\begin{align*}
+I^*(k) \triangleq&\ k
+\\
+I^*(a) \triangleq&\ I_{int}(a)
+\\
+I^*(T^1_{int} + T^2_{int}) \triangleq&\ I^*(T^1_{int})  + I^*(T^2_{int})
+\\
+I^*(T^1_{int} - T^2_{int}) \triangleq&\ I^*(T^1_{int})  - I^*(T^2_{int})
+\\
+I^*(\max(T^1_{int}, T^2_{int})) \triangleq&\ \max(I^*(T^1_{int}), I^*(T^2_{int}))
+\\
+I^*(\min(T^1_{int}, T^2_{int})) \triangleq&\ \min(I^*(T^1_{int}), I^*(T^2_{int}))
+% \\
+% I^*(\min(T_{bag})) \triangleq&\ k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'< k.~I^\circ(T_{bag})(k')=0
+% \\
+% I^*(\max(T_{bag})) \triangleq&\ k \mbox{ s.t. } I^\circ(T_{bag})(k) > 0 \mbox{ and }\forall k'> k.~I^\circ(T_{bag})(k')=0
+\\
+I^*(\ite(F, T^1_{int}, T^2_{int})) \triangleq&\
+\left\{\begin{array}{ll}
+I^*(T^1_{int}) & \mbox{if } I\models F \\
+I^*(T^2_{int}) & \mbox{otherwise}
+\end{array}\right.
+\end{align*}
+where $\max(k_1,k_2)$ and $\min(k_1,k_2)$ are the minimum and maximum operations over $\ZZ$.
+
+Given a valuation $I$ and an integer atom $L_{int}$, the satisfiability relation $I \models L_{int}$ is defined by structural induction as follows:
+\begin{align*}
+I \models T^1_{int}=T^2_{int} \mbox{ iff }& I^*(T^1_{int}) = I^*(T^2_{int}) \\
+I \models T^1_{int}\ne T^2_{int} \mbox{ iff }& I^*(T^1_{int}) \ne I^*(T^2_{int}) \\
+I \models T^1_{int} < T^2_{int} \mbox{ iff }& I^*(T^1_{int}) < I^*(T^2_{int}) \\
+I \models T^1_{int}\ge T^2_{int} \mbox{ iff }& I^*(T^1_{int}) \ge I^*(T^2_{int})
+\end{align*}
+
+Given a valuation $I$ and an integer atom $L_{ext}$, the satisfiability relation $I \models L_{ext}$ is defined by structural induction as follows:
+\begin{align*}
+I \models T^1_{ext}=T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) = I^{\bullet}(T^2_{ext}) \\
+I \models T^1_{ext}\ne T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) \ne I^{\bullet}(T^2_{ext}) \\
+I \models T^1_{ext} < T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) < I^{\bullet}(T^2_{ext}) \\
+I \models T^1_{ext}\ge T^2_{ext} \mbox{ iff }& I^{\bullet}(T^1_{ext}) \ge I^{\bullet}(T^2_{ext})
+\end{align*}
+
+Given a valuation $I$ and a formula $F$, the satisfiability relation $I \models F$ is defined by induction on the form of the formula  as follows:
+\begin{align*}
+I \models L \mbox{ iff }& I \models L \\
+I \models F_1\lor F_2 \mbox{ iff } & I \models F_1 \mbox{ or } I\models F_2 \\
+I \models F_1\land F_2 \mbox{ iff } & I \models F_1 \mbox{ and } I\models F_2 \\
+I \models \lnot F \mbox{ iff } & I \not\models F \\
+I \models F_1\limp F_2 \mbox{ iff } & I \models \lnot F_1 \mbox{ or } I\models F_2
+\end{align*}
+
+\subsection{Main Fragments}
+
+
+\subsubsection{Fragment $\QFBILIA_\nnf$}
+\label{sssec:nnf}
+
+The $\QFBILIA_\nnf$ fragment contains only formulas in the negated normal form, i.e., the logical negation is pushed to the level of literals $L_{int}, L_{bag}, L_{mix}, L_{ext}$ and $\ite$ terms are not present.
+
+\begin{mydef}
+\label{def:nnf}
+A $\QFBILIA_\nnf$ formula $F$ is defined by the following grammar:
+\begin{align*}
+F ::= &\ L \; | \; F\lor F \; | \; F\land F
+\\
+L ::= &\ L_{int} \; |\; L_{bag} \; |\; L_{mix} \; |\; L_{ext}
+\\
+L_{int} ::= &\ T_{int} = T_{int} \; |\; T_{int} \neq T_{int} \; |\; T_{int} < T_{int}\; |\; T_{int} \ge T_{int}
+\\
+L_{ext} ::= &\ T_{ext} = T_{ext} \; |\; T_{ext} \neq T_{ext} \; |\; T_{ext} < T_{ext}\; |\;  T_{ext} \ge T_{ext}
+\\
+L_{bag} ::= &\  T_{bag} = T_{bag} \; |\;T_{bag} \neq T_{bag} \; |\;T_{bag} \subseteq T_{bag} \; |\;T_{bag} \nsubseteq T_{bag} \; | \; \notag\\
+&\ T_{bag} < T_{bag} \; |\;T_{bag} \ge T_{bag}
+\\
+L_{mix}  ::=  &\ T_{int} \in T_{bag}\; |\;T_{int} \notin T_{bag}\; |\;T_{int} \in^{n} T_{bag}\; |\;T_{int} \notin^{n} T_{bag}
+\notag\\
+T_{int} ::= &\  k \;|\; a \;|\; T_{int} + T_{int} \;|\; T_{int} - T_{int}\;|\;
+\\
+&\ \max(T_{int},T_{int})\;|\; \min(T_{int},T_{int})
+\\
+T_{ext} ::= &\ k \;|\; m \;|\; \min(T_{bag}) \;|\; \max(T_{bag})
+\\
+T_{bag} ::=  &\  \bagone{}\;|\;\bagone{a} \;|\;x \;|\; T_{bag} \cup T_{bag} \;|\; T_{bag} \cap T_{bag}\;|\; T_{bag} \setminus T_{bag}\;|\; T_{bag} \uplus T_{bag}
+\end{align*}
+
+We denote by $\cF_\nnf$, $\cT_{int,\nnf}$, $\cT_{ext,\nnf}$, and $\cT_{bag,\nnf}$ the set of formulas, integer terms, resp. extremum terms, resp. multi-set terms  in $\QFBILIA_\nnf$.
+\end{mydef}

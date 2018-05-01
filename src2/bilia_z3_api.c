@@ -1,0 +1,980 @@
+#include "bilia_z3_api.h"
+
+#define LOG_Z3_CALLS
+
+#ifdef LOG_Z3_CALLS
+#define LOG_MSG(msg) Z3_append_log(msg)
+#else
+#define LOG_MSG(msg) ((void)0)
+#endif
+
+//BILIA_VECTOR_DEFINE(Z3_ast_array,Z3_ast);
+
+//Z3_ast_array * lvars_ast;
+//Z3_ast_array * wvars_ast;
+Z3_sort int_sort;
+
+/**
+   \defgroup capi_ex C API examples
+*/
+/*@{*/
+/**
+   @name Auxiliary Functions
+*/
+/*@{*/
+
+/**
+   \brief exit gracefully in case of error.
+*/
+void exitf(const char* message)
+{
+  fprintf(stderr,"BUG: %s.\n", message);
+  exit(1);
+}
+
+/**
+   \brief exit if unreachable code was reached.
+*/
+void unreachable()
+{
+    exitf("unreachable code was reached");
+}
+
+/**
+   \brief Simpler error handler.
+ */
+void error_handler(Z3_context c, Z3_error_code e)
+{
+    printf("Error code: %d\n", e);
+    exitf("incorrect use of Z3");
+}
+
+static jmp_buf g_catch_buffer;
+/**
+   \brief Low tech exceptions.
+
+   In high-level programming languages, an error handler can throw an exception.
+*/
+void throw_z3_error(Z3_context c, Z3_error_code e)
+{
+    longjmp(g_catch_buffer, e);
+}
+
+/**
+   \brief Create a logical context.
+
+   Enable model construction. Other configuration parameters can be passed in the cfg variable.
+
+   Also enable tracing to stderr and register custom error handler.
+*/
+Z3_context mk_context_custom(Z3_config cfg, Z3_error_handler err)
+{
+    Z3_context ctx;
+
+    Z3_set_param_value(cfg, "model", "true");
+    ctx = Z3_mk_context(cfg);
+    Z3_set_error_handler(ctx, err);
+
+    return ctx;
+}
+
+/**
+   \brief Create a logical context.
+
+   Enable model construction only.
+
+   Also enable tracing to stderr and register standard error handler.
+*/
+Z3_context mk_context()
+{
+    Z3_config  cfg;
+    Z3_context ctx;
+    cfg = Z3_mk_config();
+    ctx = mk_context_custom(cfg, error_handler);
+    Z3_del_config(cfg);
+    return ctx;
+}
+
+/**
+   \brief Create a logical context.
+
+   Enable fine-grained proof construction.
+   Enable model construction.
+
+   Also enable tracing to stderr and register standard error handler.
+*/
+Z3_context mk_proof_context() {
+    Z3_config cfg = Z3_mk_config();
+    Z3_context ctx;
+    Z3_set_param_value(cfg, "proof", "true");
+    ctx = mk_context_custom(cfg, throw_z3_error);
+    Z3_del_config(cfg);
+    return ctx;
+}
+
+/**
+   \brief Create a variable using the given name and type.
+*/
+Z3_ast mk_var(Z3_context ctx, const char * name, Z3_sort ty)
+{
+    Z3_symbol   s  = Z3_mk_string_symbol(ctx, name);
+    return Z3_mk_const(ctx, s, ty);
+}
+
+/**
+   \brief Create a boolean variable using the given name.
+*/
+Z3_ast mk_bool_var(Z3_context ctx, const char * name)
+{
+    Z3_sort ty = Z3_mk_bool_sort(ctx);
+    return mk_var(ctx, name, ty);
+}
+
+/**
+   \brief Create an integer variable using the given name.
+*/
+Z3_ast mk_int_var(Z3_context ctx, const char * name)
+{
+    Z3_sort ty = Z3_mk_int_sort(ctx);
+    return mk_var(ctx, name, ty);
+}
+
+/**
+   \brief Create a Z3 integer node using a C int.
+*/
+Z3_ast mk_int(Z3_context ctx, int v)
+{
+    Z3_sort ty = Z3_mk_int_sort(ctx);
+    return Z3_mk_int(ctx, v, ty);
+}
+
+/**
+   \brief Create a real variable using the given name.
+*/
+Z3_ast mk_real_var(Z3_context ctx, const char * name)
+{
+    Z3_sort ty = Z3_mk_real_sort(ctx);
+    return mk_var(ctx, name, ty);
+}
+
+/**
+   \brief Create the unary function application: <tt>(f x)</tt>.
+*/
+Z3_ast mk_unary_app(Z3_context ctx, Z3_func_decl f, Z3_ast x)
+{
+    Z3_ast args[1] = {x};
+    return Z3_mk_app(ctx, f, 1, args);
+}
+
+/**
+   \brief Create the binary function application: <tt>(f x y)</tt>.
+*/
+Z3_ast mk_binary_app(Z3_context ctx, Z3_func_decl f, Z3_ast x, Z3_ast y)
+{
+    Z3_ast args[2] = {x, y};
+    return Z3_mk_app(ctx, f, 2, args);
+}
+
+/**
+   \brief Check whether the logical context is satisfiable, and compare the result with the expected result.
+   If the context is satisfiable, then display the model.
+*/
+void check(Z3_context ctx, Z3_lbool expected_result)
+{
+    Z3_model m      = 0;
+    Z3_lbool result = Z3_check_and_get_model(ctx, &m);
+    switch (result) {
+    case Z3_L_FALSE:
+        printf("unsat\n");
+        break;
+    case Z3_L_UNDEF:
+        printf("unknown\n");
+        printf("potential model:\n%s\n", Z3_model_to_string(ctx, m));
+        break;
+    case Z3_L_TRUE:
+        printf("sat\n%s\n", Z3_model_to_string(ctx, m));
+        break;
+    }
+    if (m) {
+        Z3_del_model(ctx, m);
+    }
+    if (result != expected_result) {
+        exitf("unexpected result");
+    }
+}
+
+/**
+   \brief Prove that the constraints already asserted into the logical
+   context implies the given formula.  The result of the proof is
+   displayed.
+
+   Z3 is a satisfiability checker. So, one can prove \c f by showing
+   that <tt>(not f)</tt> is unsatisfiable.
+
+   The context \c ctx is not modified by this function.
+*/
+void prove(Z3_context ctx, Z3_ast f, Z3_bool is_valid)
+{
+    Z3_model m;
+    Z3_ast   not_f;
+
+    /* save the current state of the context */
+    Z3_push(ctx);
+
+    not_f = Z3_mk_not(ctx, f);
+    Z3_assert_cnstr(ctx, not_f);
+
+    m = 0;
+
+    switch (Z3_check_and_get_model(ctx, &m)) {
+    case Z3_L_FALSE:
+        /* proved */
+        printf("valid\n");
+        if (!is_valid) {
+            exitf("unexpected result");
+        }
+        break;
+    case Z3_L_UNDEF:
+        /* Z3 failed to prove/disprove f. */
+        printf("unknown\n");
+        if (m != 0) {
+            /* m should be viewed as a potential counterexample. */
+            printf("potential counterexample:\n%s\n", Z3_model_to_string(ctx, m));
+        }
+        if (is_valid) {
+            exitf("unexpected result");
+        }
+        break;
+    case Z3_L_TRUE:
+        /* disproved */
+        printf("invalid\n");
+        if (m) {
+            /* the model returned by Z3 is a counterexample */
+            printf("counterexample:\n%s\n", Z3_model_to_string(ctx, m));
+        }
+        if (is_valid) {
+            exitf("unexpected result");
+        }
+        break;
+    }
+
+    if (m) {
+        Z3_del_model(ctx, m);
+    }
+
+    /* restore context */
+    Z3_pop(ctx, 1);
+}
+
+/**
+   \brief Assert the axiom: function f is injective in the i-th argument.
+
+   The following axiom is asserted into the logical context:
+   \code
+   forall (x_0, ..., x_n) finv(f(x_0, ..., x_i, ..., x_{n-1})) = x_i
+   \endcode
+
+   Where, \c finv is a fresh function declaration.
+*/
+void assert_inj_axiom(Z3_context ctx, Z3_func_decl f, unsigned i)
+{
+    unsigned sz, j;
+    Z3_sort finv_domain, finv_range;
+    Z3_func_decl finv;
+    Z3_sort * types; /* types of the quantified variables */
+    Z3_symbol *   names; /* names of the quantified variables */
+    Z3_ast * xs;         /* arguments for the application f(x_0, ..., x_i, ..., x_{n-1}) */
+    Z3_ast   x_i, fxs, finv_fxs, eq;
+    Z3_pattern p;
+    Z3_ast   q;
+    sz = Z3_get_domain_size(ctx, f);
+
+    if (i >= sz) {
+        exitf("failed to create inj axiom");
+    }
+
+    /* declare the i-th inverse of f: finv */
+    finv_domain = Z3_get_range(ctx, f);
+    finv_range  = Z3_get_domain(ctx, f, i);
+    finv        = Z3_mk_fresh_func_decl(ctx, "inv", 1, &finv_domain, finv_range);
+
+    /* allocate temporary arrays */
+    types       = (Z3_sort *) malloc(sizeof(Z3_sort) * sz);
+    names       = (Z3_symbol *) malloc(sizeof(Z3_symbol) * sz);
+    xs          = (Z3_ast *) malloc(sizeof(Z3_ast) * sz);
+
+    /* fill types, names and xs */
+    for (j = 0; j < sz; j++) { types[j] = Z3_get_domain(ctx, f, j); };
+    for (j = 0; j < sz; j++) { names[j] = Z3_mk_int_symbol(ctx, j); };
+    for (j = 0; j < sz; j++) { xs[j]    = Z3_mk_bound(ctx, j, types[j]); };
+
+    x_i = xs[i];
+
+    /* create f(x_0, ..., x_i, ..., x_{n-1}) */
+    fxs         = Z3_mk_app(ctx, f, sz, xs);
+
+    /* create f_inv(f(x_0, ..., x_i, ..., x_{n-1})) */
+    finv_fxs    = mk_unary_app(ctx, finv, fxs);
+
+    /* create finv(f(x_0, ..., x_i, ..., x_{n-1})) = x_i */
+    eq          = Z3_mk_eq(ctx, finv_fxs, x_i);
+
+    /* use f(x_0, ..., x_i, ..., x_{n-1}) as the pattern for the quantifier */
+    p           = Z3_mk_pattern(ctx, 1, &fxs);
+    printf("pattern: %s\n", Z3_pattern_to_string(ctx, p));
+    printf("\n");
+
+    /* create & assert quantifier */
+    q           = Z3_mk_forall(ctx,
+                                 0, /* using default weight */
+                                 1, /* number of patterns */
+                                 &p, /* address of the "array" of patterns */
+                                 sz, /* number of quantified variables */
+                                 types,
+                                 names,
+                                 eq);
+    printf("assert axiom:\n%s\n", Z3_ast_to_string(ctx, q));
+    Z3_assert_cnstr(ctx, q);
+
+    /* free temporary arrays */
+    free(types);
+    free(names);
+    free(xs);
+}
+
+/**
+   \brief Assert the axiom: function f is commutative.
+
+   This example uses the SMT-LIB parser to simplify the axiom construction.
+*/
+void assert_comm_axiom(Z3_context ctx, Z3_func_decl f)
+{
+    Z3_sort t;
+    Z3_symbol f_name, t_name;
+    Z3_ast q;
+
+    t = Z3_get_range(ctx, f);
+
+    if (Z3_get_domain_size(ctx, f) != 2 ||
+        Z3_get_domain(ctx, f, 0) != t ||
+        Z3_get_domain(ctx, f, 1) != t) {
+        exitf("function must be binary, and argument types must be equal to return type");
+    }
+
+    /* Inside the parser, function f will be referenced using the symbol 'f'. */
+    f_name = Z3_mk_string_symbol(ctx, "f");
+
+    /* Inside the parser, type t will be referenced using the symbol 'T'. */
+    t_name = Z3_mk_string_symbol(ctx, "T");
+
+
+    Z3_parse_smtlib_string(ctx,
+                           "(benchmark comm :formula (forall (x T) (y T) (= (f x y) (f y x))))",
+                           1, &t_name, &t,
+                           1, &f_name, &f);
+    q = Z3_get_smtlib_formula(ctx, 0);
+    printf("assert axiom:\n%s\n", Z3_ast_to_string(ctx, q));
+    Z3_assert_cnstr(ctx, q);
+}
+
+/**
+   \brief Z3 does not support explicitly tuple updates. They can be easily implemented
+   as macros. The argument \c t must have tuple type.
+   A tuple update is a new tuple where field \c i has value \c new_val, and all
+   other fields have the value of the respective field of \c t.
+
+   <tt>update(t, i, new_val)</tt> is equivalent to
+   <tt>mk_tuple(proj_0(t), ..., new_val, ..., proj_n(t))</tt>
+*/
+Z3_ast mk_tuple_update(Z3_context c, Z3_ast t, unsigned i, Z3_ast new_val)
+{
+    Z3_sort         ty;
+    Z3_func_decl   mk_tuple_decl;
+    unsigned            num_fields, j;
+    Z3_ast *            new_fields;
+    Z3_ast              result;
+
+    ty = Z3_get_sort(c, t);
+
+    if (Z3_get_sort_kind(c, ty) != Z3_DATATYPE_SORT) {
+        exitf("argument must be a tuple");
+    }
+
+    num_fields = Z3_get_tuple_sort_num_fields(c, ty);
+
+    if (i >= num_fields) {
+        exitf("invalid tuple update, index is too big");
+    }
+
+    new_fields = (Z3_ast*) malloc(sizeof(Z3_ast) * num_fields);
+    for (j = 0; j < num_fields; j++) {
+        if (i == j) {
+            /* use new_val at position i */
+            new_fields[j] = new_val;
+        }
+        else {
+            /* use field j of t */
+            Z3_func_decl proj_decl = Z3_get_tuple_sort_field_decl(c, ty, j);
+            new_fields[j] = mk_unary_app(c, proj_decl, t);
+        }
+    }
+    mk_tuple_decl = Z3_get_tuple_sort_mk_decl(c, ty);
+    result = Z3_mk_app(c, mk_tuple_decl, num_fields, new_fields);
+    free(new_fields);
+    return result;
+}
+
+/**
+   \brief Display a symbol in the given output stream.
+*/
+void display_symbol(Z3_context c, FILE * out, Z3_symbol s)
+{
+    switch (Z3_get_symbol_kind(c, s)) {
+    case Z3_INT_SYMBOL:
+        fprintf(out, "#%d", Z3_get_symbol_int(c, s));
+        break;
+    case Z3_STRING_SYMBOL:
+        fprintf(out, "%s", Z3_get_symbol_string(c, s));
+        break;
+    default:
+        unreachable();
+    }
+}
+
+/**
+   \brief Display the given type.
+*/
+void display_sort(Z3_context c, FILE * out, Z3_sort ty)
+{
+    switch (Z3_get_sort_kind(c, ty)) {
+    case Z3_UNINTERPRETED_SORT:
+        display_symbol(c, out, Z3_get_sort_name(c, ty));
+        break;
+    case Z3_BOOL_SORT:
+        fprintf(out, "bool");
+        break;
+    case Z3_INT_SORT:
+        fprintf(out, "int");
+        break;
+    case Z3_REAL_SORT:
+        fprintf(out, "real");
+        break;
+    case Z3_BV_SORT:
+        fprintf(out, "bv%d", Z3_get_bv_sort_size(c, ty));
+        break;
+    case Z3_ARRAY_SORT:
+        fprintf(out, "[");
+        display_sort(c, out, Z3_get_array_sort_domain(c, ty));
+        fprintf(out, "->");
+        display_sort(c, out, Z3_get_array_sort_range(c, ty));
+        fprintf(out, "]");
+        break;
+    case Z3_DATATYPE_SORT:
+		if (Z3_get_datatype_sort_num_constructors(c, ty) != 1)
+		{
+			fprintf(out, "%s", Z3_sort_to_string(c,ty));
+			break;
+		}
+		{
+        unsigned num_fields = Z3_get_tuple_sort_num_fields(c, ty);
+        unsigned i;
+        fprintf(out, "(");
+        for (i = 0; i < num_fields; i++) {
+            Z3_func_decl field = Z3_get_tuple_sort_field_decl(c, ty, i);
+            if (i > 0) {
+                fprintf(out, ", ");
+            }
+            display_sort(c, out, Z3_get_range(c, field));
+        }
+        fprintf(out, ")");
+        break;
+    }
+    default:
+        fprintf(out, "unknown[");
+        display_symbol(c, out, Z3_get_sort_name(c, ty));
+        fprintf(out, "]");
+        break;
+    }
+}
+
+/**
+   \brief Custom ast pretty printer.
+
+   This function demonstrates how to use the API to navigate terms.
+*/
+void display_ast(Z3_context c, FILE * out, Z3_ast v)
+{
+    switch (Z3_get_ast_kind(c, v)) {
+    case Z3_NUMERAL_AST: {
+        Z3_sort t;
+        fprintf(out, "%s", Z3_get_numeral_string(c, v));
+        t = Z3_get_sort(c, v);
+        fprintf(out, ":");
+        display_sort(c, out, t);
+        break;
+    }
+    case Z3_APP_AST: {
+        unsigned i;
+        Z3_app app = Z3_to_app(c, v);
+        unsigned num_fields = Z3_get_app_num_args(c, app);
+        Z3_func_decl d = Z3_get_app_decl(c, app);
+        fprintf(out, "%s", Z3_func_decl_to_string(c, d));
+        if (num_fields > 0) {
+            fprintf(out, "[");
+            for (i = 0; i < num_fields; i++) {
+                if (i > 0) {
+                    fprintf(out, ", ");
+                }
+                display_ast(c, out, Z3_get_app_arg(c, app, i));
+            }
+            fprintf(out, "]");
+        }
+        break;
+    }
+    case Z3_QUANTIFIER_AST: {
+        fprintf(out, "quantifier");
+        ;
+    }
+    default:
+        fprintf(out, "#unknown");
+    }
+}
+
+/**
+   \brief Custom function interpretations pretty printer.
+*/
+void display_function_interpretations(Z3_context c, FILE * out, Z3_model m)
+{
+    unsigned num_functions, i;
+
+    fprintf(out, "function interpretations:\n");
+
+    num_functions = Z3_get_model_num_funcs(c, m);
+    for (i = 0; i < num_functions; i++) {
+        Z3_func_decl fdecl;
+        Z3_symbol name;
+        Z3_ast func_else;
+        unsigned num_entries, j;
+
+        fdecl = Z3_get_model_func_decl(c, m, i);
+        name = Z3_get_decl_name(c, fdecl);
+        display_symbol(c, out, name);
+        fprintf(out, " = {");
+        num_entries = Z3_get_model_func_num_entries(c, m, i);
+        for (j = 0; j < num_entries; j++) {
+            unsigned num_args, k;
+            if (j > 0) {
+                fprintf(out, ", ");
+            }
+            num_args = Z3_get_model_func_entry_num_args(c, m, i, j);
+            fprintf(out, "(");
+            for (k = 0; k < num_args; k++) {
+                if (k > 0) {
+                    fprintf(out, ", ");
+                }
+                display_ast(c, out, Z3_get_model_func_entry_arg(c, m, i, j, k));
+            }
+            fprintf(out, "|->");
+            display_ast(c, out, Z3_get_model_func_entry_value(c, m, i, j));
+            fprintf(out, ")");
+        }
+        if (num_entries > 0) {
+            fprintf(out, ", ");
+        }
+        fprintf(out, "(else|->");
+        func_else = Z3_get_model_func_else(c, m, i);
+        display_ast(c, out, func_else);
+        fprintf(out, ")}\n");
+    }
+}
+
+/**
+   \brief Custom model pretty printer.
+*/
+void display_model(Z3_context c, FILE * out, Z3_model m)
+{
+    unsigned num_constants;
+    unsigned i;
+
+    num_constants = Z3_get_model_num_constants(c, m);
+    for (i = 0; i < num_constants; i++) {
+        Z3_symbol name;
+        Z3_func_decl cnst = Z3_get_model_constant(c, m, i);
+        Z3_ast a, v;
+        Z3_bool ok;
+        name = Z3_get_decl_name(c, cnst);
+        display_symbol(c, out, name);
+        fprintf(out, " = ");
+        a = Z3_mk_app(c, cnst, 0, 0);
+        v = a;
+        ok = Z3_eval(c, m, a, &v);
+        display_ast(c, out, v);
+        fprintf(out, "\n");
+    }
+    display_function_interpretations(c, out, m);
+}
+
+/**
+   \brief Similar to #check, but uses #display_model instead of #Z3_model_to_string.
+*/
+void check2(Z3_context ctx, Z3_lbool expected_result)
+{
+    Z3_model m      = 0;
+    Z3_lbool result = Z3_check_and_get_model(ctx, &m);
+    switch (result) {
+    case Z3_L_FALSE:
+        printf("unsat\n");
+        break;
+    case Z3_L_UNDEF:
+        printf("unknown\n");
+        printf("potential model:\n");
+        display_model(ctx, stdout, m);
+        break;
+    case Z3_L_TRUE:
+        printf("sat\n");
+        display_model(ctx, stdout, m);
+        break;
+    }
+    if (m) {
+        Z3_del_model(ctx, m);
+    }
+    if (result != expected_result) {
+        exitf("unexpected result");
+    }
+}
+
+/**
+   \brief Display Z3 version in the standard output.
+*/
+void display_version()
+{
+    unsigned major, minor, build, revision;
+    Z3_get_version(&major, &minor, &build, &revision);
+    printf("Z3 %d.%d.%d.%d\n", major, minor, build, revision);
+}
+/*@}*/
+
+/**
+   @name Examples
+*/
+/*@{*/
+/**
+   \brief "Hello world" example: create a Z3 logical context, and delete it.
+*/
+void simple_example()
+{
+    Z3_context ctx;
+    LOG_MSG("simple_example");
+    printf("\nsimple_example\n");
+
+    ctx = mk_context();
+
+    /* do something with the context */
+    printf("CONTEXT:\n%sEND OF CONTEXT\n", Z3_context_to_string(ctx));
+
+    /* delete logical context */
+    Z3_del_context(ctx);
+}
+
+/**
+  Demonstration of how Z3 can be used to prove validity of
+  De Morgan's Duality Law: {e not(x and y) <-> (not x) or ( not y) }
+*/
+void demorgan()
+{
+    Z3_config cfg;
+    Z3_context ctx;
+    Z3_sort bool_sort;
+    Z3_symbol symbol_x, symbol_y;
+    Z3_ast x, y, not_x, not_y, x_and_y, ls, rs, conjecture, negated_conjecture;
+    Z3_ast args[2];
+
+    printf("\nDeMorgan\n");
+    LOG_MSG("DeMorgan");
+
+    cfg                = Z3_mk_config();
+    ctx                = Z3_mk_context(cfg);
+    Z3_del_config(cfg);
+    bool_sort          = Z3_mk_bool_sort(ctx);
+    symbol_x           = Z3_mk_int_symbol(ctx, 0);
+    symbol_y           = Z3_mk_int_symbol(ctx, 1);
+    x                  = Z3_mk_const(ctx, symbol_x, bool_sort);
+    y                  = Z3_mk_const(ctx, symbol_y, bool_sort);
+
+    /* De Morgan - with a negation around */
+    /* !(!(x && y) <-> (!x || !y)) */
+    not_x              = Z3_mk_not(ctx, x);
+    not_y              = Z3_mk_not(ctx, y);
+    args[0]            = x;
+    args[1]            = y;
+    x_and_y            = Z3_mk_and(ctx, 2, args);
+    ls                 = Z3_mk_not(ctx, x_and_y);
+    args[0]            = not_x;
+    args[1]            = not_y;
+    rs                 = Z3_mk_or(ctx, 2, args);
+    conjecture         = Z3_mk_iff(ctx, ls, rs);
+    negated_conjecture = Z3_mk_not(ctx, conjecture);
+
+    Z3_assert_cnstr(ctx, negated_conjecture);
+    switch (Z3_check(ctx)) {
+    case Z3_L_FALSE:
+        /* The negated conjecture was unsatisfiable, hence the conjecture is valid */
+        printf("DeMorgan is valid\n");
+        break;
+    case Z3_L_UNDEF:
+        /* Check returned undef */
+        printf("Undef\n");
+        break;
+    case Z3_L_TRUE:
+        /* The negated conjecture was satisfiable, hence the conjecture is not valid */
+        printf("DeMorgan is not valid\n");
+        break;
+    }
+    Z3_del_context(ctx);
+}
+
+/*@}*/
+/*@}*/
+
+// void add_variables(Z3_context ctx){
+//   /*Create Type*/
+//   lvars_ast = Z3_ast_array_new();
+//   bilia_var_array * lvars = bilia_entl_get_var_array();
+//   for (uint_t i = 0; i < BILIA_VECTOR_SIZE(lvars); i++) {
+//     bilia_var_t * var = bilia_vector_at(lvars,i);
+//     /*Check type*/
+//     if(var->vty->kind == BILIA_TYP_INT){
+//       Z3_ast_array_push(lvars_ast,Z3_mk_const(ctx,Z3_mk_string_symbol(ctx,var->vname),int_sort));
+//     }
+//   }
+//   wvars_ast = Z3_ast_array_new();
+//   bilia_var_array * wvars = bilia_entl_get_wvar_array();
+//   for (uint_t i = 0; i < BILIA_VECTOR_SIZE(wvars); i++) {
+//     bilia_var_t * var = bilia_vector_at(wvars,i);
+//     /*Check type*/
+//     if(var->vty->kind == BILIA_TYP_INT){
+//       /*SOUCIS AVEC LES NUMEROS à checker*/
+//       Z3_ast_array_push(wvars_ast,Z3_mk_const(ctx,Z3_mk_string_symbol(ctx,var->vname),int_sort));
+//     }
+//   }
+// }
+
+Z3_ast add_dterm(Z3_context ctx,bilia_dterm_t * term){
+  /*Declare min-max function*/
+  Z3_sort f_sort[2];
+  f_sort[0] = int_sort;
+  f_sort[1] = int_sort;
+  if(term->kind == BILIA_DATA_APP)
+  {
+    Z3_ast args = add_dterm(ctx,bilia_vector_at(term->args,1));
+    bilia_var_t * var = bilia_vector_at(bilia_entl_get_var_array(),bilia_vector_at(term->args,0)->p.sid);
+    return Z3_mk_app(ctx,Z3_mk_func_decl(ctx,Z3_mk_string_symbol(ctx,var->vname),1,&int_sort,int_sort),1,&args);
+  }
+
+  if(term->kind == BILIA_DATA_MAX || term->kind == BILIA_DATA_MIN || term->kind == BILIA_DATA_PLUS || term->kind == BILIA_DATA_MINUS){
+    Z3_ast args[BILIA_VECTOR_SIZE(term->args)];
+    for (uint_t i = 0; i < BILIA_VECTOR_SIZE(term->args); i++)
+      args[i] = add_dterm(ctx,bilia_vector_at(term->args,i));
+    switch(term->kind){
+      case BILIA_DATA_PLUS:
+        return Z3_mk_add(ctx,BILIA_VECTOR_SIZE(term->args),args);
+      case BILIA_DATA_MINUS:
+        return Z3_mk_sub(ctx,BILIA_VECTOR_SIZE(term->args),args);
+      case BILIA_DATA_MAX:
+        return Z3_mk_app(ctx,Z3_mk_func_decl(ctx,Z3_mk_string_symbol(ctx,"max"),2,f_sort,int_sort),BILIA_VECTOR_SIZE(term->args),args);
+      case BILIA_DATA_MIN:
+        return Z3_mk_app(ctx,Z3_mk_func_decl(ctx,Z3_mk_string_symbol(ctx,"min"),2,f_sort,int_sort),BILIA_VECTOR_SIZE(term->args),args);
+    }
+  }
+  switch(term->kind){
+    case BILIA_DATA_INT:
+      return Z3_mk_int(ctx,term->p.value,int_sort);
+    case BILIA_DATA_VAR:{
+      bilia_var_t * var = NULL;
+      if(term->typ == BILIA_TYP_W)
+        var = bilia_vector_at(bilia_entl_get_wvar_array(),term->p.sid);
+      else
+        var = bilia_vector_at(bilia_entl_get_var_array(),term->p.sid);
+      return Z3_mk_const(ctx,Z3_mk_string_symbol(ctx,var->vname),int_sort);
+      }
+  }
+  printf("error\n");
+  fflush(stdout);
+  return NULL;
+}
+
+Z3_ast add_dform(Z3_context ctx,bilia_dform_t * form){
+  if(form->kind == BILIA_DATA_AND || form->kind == BILIA_DATA_OR || form->kind == BILIA_DATA_IMPLIES || form->kind == BILIA_DATA_NOT){
+      Z3_ast args[BILIA_VECTOR_SIZE(form->p.bargs)];
+      for (uint_t i = 0; i < BILIA_VECTOR_SIZE(form->p.bargs); i++)
+        args[i] = add_dform(ctx,bilia_vector_at(form->p.bargs,i));
+      switch(form->kind){
+        case BILIA_DATA_AND:
+          return Z3_mk_and(ctx,BILIA_VECTOR_SIZE(form->p.bargs),args);
+        case BILIA_DATA_OR:
+          return Z3_mk_or(ctx,BILIA_VECTOR_SIZE(form->p.bargs),args);
+        case BILIA_DATA_NOT:
+          return Z3_mk_not(ctx,args[0]);
+        case BILIA_DATA_IMPLIES:
+          return Z3_mk_implies(ctx,args[0],args[1]);
+        }
+    }
+    if(form->kind == BILIA_DATA_EQ || form->kind == BILIA_DATA_NEQ || form->kind == BILIA_DATA_LE || form->kind == BILIA_DATA_GE || form->kind == BILIA_DATA_GT \
+     || form->kind == BILIA_DATA_LT)
+      {
+        Z3_ast args[BILIA_VECTOR_SIZE(form->p.targs)];
+        for (uint_t i = 0; i < BILIA_VECTOR_SIZE(form->p.targs); i++)
+          args[i] = add_dterm(ctx,bilia_vector_at(form->p.targs,i));
+        switch(form->kind){
+          case BILIA_DATA_EQ:
+            return Z3_mk_eq(ctx,args[0],args[1]);
+          case BILIA_DATA_NEQ:
+            return Z3_mk_distinct(ctx,BILIA_VECTOR_SIZE(form->p.targs),args);
+          case BILIA_DATA_LE:
+            return Z3_mk_le(ctx,args[0],args[1]);
+          case BILIA_DATA_LT:
+            return Z3_mk_lt(ctx,args[0],args[1]);
+          case BILIA_DATA_GT:
+            return Z3_mk_gt(ctx,args[0],args[1]);
+          case BILIA_DATA_GE:
+            return Z3_mk_ge(ctx,args[0],args[1]);
+        }
+      }
+      printf("error\n");
+      fflush(stdout);
+      return NULL;
+}
+
+
+void bilia_z3_api() {
+// #ifdef LOG_Z3_CALLS
+//     Z3_open_log("z3.log");
+// #endif
+//     display_version();
+//     simple_example();
+//     demorgan();
+
+  /*Init Z3*/
+  Z3_config cfg;
+  Z3_context ctx;
+  cfg                = Z3_mk_config();
+  Z3_set_param_value(cfg, "model", "true");
+  //Z3_set_param_value(cfg, "macro-finder", "true");
+  ctx                = Z3_mk_context(cfg);
+  Z3_del_config(cfg);
+  Z3_set_logic(ctx,"QF_UFLIA");
+  int_sort = Z3_mk_int_sort(ctx);
+  /*Declare min-max function*/
+  Z3_sort f_sort[2];
+  f_sort[0] = int_sort;
+  f_sort[1] = int_sort;
+  Z3_func_decl max = Z3_mk_func_decl(ctx,Z3_mk_string_symbol(ctx,"max"),2,f_sort,int_sort);
+  Z3_func_decl min = Z3_mk_func_decl(ctx,Z3_mk_string_symbol(ctx,"min"),2,f_sort,int_sort);
+  /*(forall ((x Int) (y Int))
+    (= (max x y) (ite (< x y) y x))))*/
+
+  unsigned sz, j;
+  Z3_sort * types; /* types of the quantified variables */
+  Z3_symbol *   names; /* names of the quantified variables */
+  Z3_ast * xs;         /* arguments for the application f(x_0, ..., x_i, ..., x_{n-1}) */
+  Z3_ast  fxs,eq,ite;
+  Z3_pattern p;
+  Z3_ast   q;
+
+  types       = (Z3_sort *) malloc(sizeof(Z3_sort) * sz);
+  names       = (Z3_symbol *) malloc(sizeof(Z3_symbol) * sz);
+  xs          = (Z3_ast *) malloc(sizeof(Z3_ast) * sz);
+
+  sz = Z3_get_domain_size(ctx, max);
+
+  for (j = 0; j < sz; j++) { types[j] = Z3_get_domain(ctx, max, j); };
+  for (j = 0; j < sz; j++) { names[j] = Z3_mk_int_symbol(ctx, j); };
+  for (j = 0; j < sz; j++) { xs[j]    = Z3_mk_bound(ctx, j, types[j]); };
+  fxs = Z3_mk_app(ctx, max, sz, xs);
+  ite = Z3_mk_ite(ctx,Z3_mk_gt(ctx,xs[0],xs[1]),xs[0],xs[1]);
+  eq  = Z3_mk_eq(ctx, fxs, ite);
+  p           = Z3_mk_pattern(ctx, 1, &fxs);
+  q           = Z3_mk_forall(ctx,
+                               0, /* using default weight */
+                               1, /* number of patterns */
+                               &p, /* address of the "array" of patterns */
+                               sz, /* number of quantified variables */
+                               types,
+                               names,
+                               eq);
+  Z3_assert_cnstr(ctx, q);
+  //printf("assert axiom:\n%s\n", Z3_ast_to_string(ctx, q));
+
+
+  sz = Z3_get_domain_size(ctx, min);
+
+  for (j = 0; j < sz; j++) { types[j] = Z3_get_domain(ctx, min, j); };
+  for (j = 0; j < sz; j++) { names[j] = Z3_mk_int_symbol(ctx, j); };
+  for (j = 0; j < sz; j++) { xs[j]    = Z3_mk_bound(ctx, j, types[j]); };
+  fxs = Z3_mk_app(ctx, min, sz, xs);
+  ite = Z3_mk_ite(ctx,Z3_mk_gt(ctx,xs[1],xs[0]),xs[0],xs[1]);
+  eq  = Z3_mk_eq(ctx, fxs, ite);
+  p           = Z3_mk_pattern(ctx, 1, &fxs);
+  q           = Z3_mk_forall(ctx,
+                               0, /* using default weight */
+                               1, /* number of patterns */
+                               &p, /* address of the "array" of patterns */
+                               sz, /* number of quantified variables */
+                               types,
+                               names,
+                               eq);
+  Z3_assert_cnstr(ctx, q);
+  //printf("assert axiom:\n%s\n", Z3_ast_to_string(ctx, q));
+
+
+  free(types);
+  free(names);
+  free(xs);
+
+  //assert_inj_axiom(ctx,max,1);
+  /*Reste a faire les forall*/
+
+  /*Add variable to problem*/
+  //add_variables(ctx);
+  /*Add formulas to probleme*/
+  bilia_dform_array * nform = bilia_entl_get_nform();
+  for (uint_t i = 0; i < BILIA_VECTOR_SIZE(nform); i++) {
+    Z3_ast ast = add_dform(ctx,bilia_vector_at(nform,i));
+    //printf("%s\n",Z3_ast_to_string(ctx,ast));
+    Z3_assert_cnstr(ctx, ast);
+  }
+
+  bilia_dform_array * rform = bilia_entl_get_rform();
+  for (uint_t i = 0; i < BILIA_VECTOR_SIZE(rform); i++) {
+    Z3_ast ast = add_dform(ctx,bilia_vector_at(rform,i));
+    //printf("%s\n",Z3_ast_to_string(ctx,ast));
+    Z3_assert_cnstr(ctx, ast);
+  }
+
+  bilia_dform_array * wform = bilia_entl_get_wform();
+  Z3_ast andw[BILIA_VECTOR_SIZE(wform)];
+  for (uint_t i = 0; i < BILIA_VECTOR_SIZE(wform); i++) {
+    andw[i] = add_dform(ctx,bilia_vector_at(wform,i));
+    //printf("%s\n",Z3_ast_to_string(ctx,ast));
+  }
+  Z3_assert_cnstr(ctx, Z3_mk_and(ctx,BILIA_VECTOR_SIZE(wform),andw));
+
+  //Z3_model m      = 0;
+
+  switch (Z3_check(ctx)) {
+  case Z3_L_FALSE:
+      /* The negated conjecture was unsatisfiable, hence the conjecture is valid */
+      printf("unsat\n");
+      break;
+  case Z3_L_UNDEF:
+      /* Check returned undef */
+      printf("Undef\n");
+      break;
+  case Z3_L_TRUE:
+      /* The negated conjecture was satisfiable, hence the conjecture is not valid */
+      printf("sat\n");
+      //printf("potential model:\n%s\n", Z3_model_to_string(ctx, m));
+      break;
+  }
+  Z3_del_context(ctx);
+}

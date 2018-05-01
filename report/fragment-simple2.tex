@@ -1,0 +1,145 @@
+%!TEX root = main.tex
+
+\section{Decision procedure for the simple fragment}
+\label{sec:fsimple}
+
+\\We will assume an input formula of conjunctions without $not$ or $\Rightarrow$ this case will be explain in 
+annexe because it's a purely propotional logics tips which might complicate things unnessecary
+
+\\The desicion procedure for the simple fragment is pretty straight forward when
+we get the translation from $bag$ to uninterpreted fonctions.
+Indeed we will create an UF for each bag according to the following constraints
+\\Let a $bag x$ and is UF $X$:
+\begin{itemize}
+\renewcommand{\labelitemi}{-}
+\setlength{\itemsep}{0cm}%
+\setlength{\parskip}{0cm}%
+\item $\forall i \in \mathbb{Z} ( i \in x \Rightarrow X(i) = 1)$
+\item $\forall i \in \mathbb{Z} ( i \notin x \Rightarrow X(i) = 0)$
+\end{itemize}
+
+\\In order to use small model property we have to create a set containing every variable
+\begin{itemize}
+\renewcommand{\labelitemi}{-}
+\setlength{\itemsep}{0cm}%
+\setlength{\parskip}{0cm}%
+\item Let $\nu_{int}$ the set of $int$ variable 
+\item Let $\nu_{bag}$ the set of $bag$ variable
+\item Let $\nu_{count}$ the set of $int$ variable which represente $w_{a,x} = count(a,x)$
+\end{itemize}
+
+\\Where $pure\_int$ are formula of form :
+\begin{tabular}{lcr}
+$t_{1} \leq t_{2}$ & $t_{1} \geq t_{2}$ & $t_{1} < t_{2}$ \\
+$t_{1} > t_{2}$ & $t_{1} = t_{2}$ & $t_{1} \neq t_{2}$ \\
+\end{tabular}
+
+\\Where $t_{i}$ are $pure$ term of form:
+\begin{itemize}
+\renewcommand{\labelitemi}{-}
+\setlength{\itemsep}{0cm}%
+\setlength{\parskip}{0cm}%
+% $\leq$, $\geq$, $<$, $>$, $=$, $\neq$
+\item  $v$ where $v$ an int variable or constant
+\item  $t_{1} + t_{2}$ where $t_{1}$ and $t_{2}$ pure term
+\item  $t_{1} - t_{2}$ where $t_{1}$ and $t_{2}$ pure term
+\item  $max(t_{1},t_{2})$ where $t_{1}$ and $t_{2}$ pure term
+\item  $min(t_{1},t_{2})$ where $t_{1}$ and $t_{2}$ pure term
+\end{itemize}
+
+
+\\Where $pure\_bag$ are formula of form :
+% $\cup$ (union), $\uplus$ (sum), $\setminus$ (minus), $\cap$ (intersection)
+\begin{tabular}{lr}
+$x_{1} = x_{2} \cup x_{3}$ & $x_{1} = x_{2} \uplus x_{3}$ \\
+$x_{1} = x_{2} \setminus x_{3}$ & $x_{1} = x_{2} \cap x_{3}$ \\
+\end{tabular}
+\\Where $x_{i}$ are $bag$ variable. 
+
+
+\subsection{First Step : generate $\nu_{int}$ variable}
+For each literal of the form $x_{1} \neq x_{2}$  
+
+\subsection{First step: Variable abstraction}
+In the first step we will create $int$ and $bag$ variable for each none $pure$ form/term
+replace such form/term with the variable and add constraints to $\phi_{pure\_int}$ or $\phi_{pure\_bag}$
+to match the problem.
+At the end of the section we should have created every variable we need for our problem
+(Attention $\neq$)
+
+\\Rewriting should begin with the deepest from of the AST
+
+\\Forms :
+\\
+\begin{tabular}{c|c|c}
+$\phi_{rew}$ form & $\nu_{int}$ var & $\phi_{rew}$ form\\
+\hline
+$x_{1} \leq x_{2}$  && $max(x_{1}) \leq min(x_{2})$\\
+$x_{1} \geq x_{2}$  && $min(x_{1}) \geq max(x_{2})$\\
+$x_{1} > x_{2}$  && $min(x_{1}) > max(x_{2})$\\
+$x_{1} < x_{2}$  && $max(x_{1}) < min(x_{2})$\\
+$x_{1} \subset x_{2}$  && $x_{1} \subseteq x_{2}$ and $x_{1} \neq x_{2}$ \\
+$x_{1} \neq x_{2}$ & $x_{1}neqx_{2}$ & cf UF rewrite\\
+
+% $x_{1} \subseteq x_{2}$ &&&& $\forall i \in \mathbb{Z} (i\in x_{1} \Rightarrow i \in x_{2})$\\
+\end{tabular}
+
+\\Rewriting should begin with the deepest term of the AST
+
+\\Terms :
+\\
+\begin{tabular}{c|c|c|c|c}
+$\phi_{rew}$ term & $\nu_{int}$ var & $\nu_{bag}$ var  & $\phi_{pure\_bag}$ form & $\phi_{rew}$ term\\
+\hline
+$\llbracket a \rrbracket$ && $baga$ && $a\in baga$ and $\forall i \in \mathbb{Z} ( i \neq a  \Rightarrow i \notin baga )$ \\
+$x_{1} \cup x_{2}$  && $x_{1}unionx_{2}$ & $x_{1}unionx_{2} = x_{1} \cup x_{2}$ & \\
+$x_{1} \cap x_{2}$  && $x_{1}interx_{2}$ & $x_{1}interx_{2} = x_{1} \cap x_{2}$ &\\
+$x_{1} \setminus x_{2}$  && $x_{1}minusx_{2}$ & $x_{1}minusx_{2} = x_{1} \setminus x_{2}$ &\\
+$x_{1} \uplus x_{2}$  && $x_{1}sumx_{2}$ & $x_{1}sumx_{2} = x_{1} \uplus x_{2}$ &\\
+$max(x_{1})$ & $bagmaxx_{1}$ &&& $\forall i \in \mathbb{Z} (i>bagmaxx_{1} \Rightarrow i \notin x_{1})$\\
+$min(x_{1})$ & $bagminx_{1}$ &&& $\forall i \in \mathbb{Z} (i>bagminx_{1} \Rightarrow i \notin x_{1})$\\
+\end{tabular}
+
+\subsection{Second step: UF rewriting}
+\\Forms :
+\\
+\begin{tabular}{c|c}
+$\phi_{rew}$ form & $\phi_{pure\_UF}$ from \\
+\hline
+$a \in x$  & $X(a) > 0$  \\
+$a \notin x$  & $X(a) = 0$  \\
+$x_{1} \neq x_{2}$ &$X_{1}(x_{1}neqx_{2}) \neq X_{2}(x_{1}neqx_{2}) $\\
+$x_{1} = x_{2}$ & $\forall i \in \mathbb{Z} (X_{1}(i) = X_{2}(i))$ \\
+$x_{1} \subseteq x_{2}$ & $\forall i \in \mathbb{Z} (X_{1}(i) <= X_{2}(i))$ \\
+\end{tabular}
+
+\\Terms :
+\\
+\begin{tabular}{c|c}
+$\phi_{rew}$ form & $\phi_{pure\_UF}$ from \\
+\hline
+$x_{1}unionx_{2} = x_{1} \cup x_{2}$ & $\forall i \in \mathbb{Z} ( X_{1}UNIONX_{2}(i) = max(X_{1}(i),X_{2}(i)))$ \\
+$x_{1}interx_{2} = x_{1} \cap x_{2}$ & $\forall i \in \mathbb{Z} ( X_{1}INTERX_{2}(i) = min(X_{1}(i),X_{2}(i)))$ \\
+$x_{1}minusx_{2} = x_{1} \setminus x_{2}$ & $\forall i \in \mathbb{Z} ( X_{1}MINUSX_{2}(i) = max(0,X_{1}(i)-X_{2}(i)))$ \\
+$x_{1}sumx_{2} = x_{1} \uplus x_{2}$ & $\forall i \in \mathbb{Z} ( X_{1}SUMX_{2}(i) = X_{1}(i) + X_{2}(i))$ \\
+\end{tabular}
+
+\subsection{Third step: $\forall$ elimination}
+Assuming there is no forall in between $\Rightarrow$ (see Annexe)
+Small model property allow us to do :
+\\$\forall i \in \mathbb{Z} \iff \forall a_{i} \in \nu_{int} $
+\\Moreover we need to add constraints over our fonctions
+\\$X_{1} = X_{2} \iff forall a_{i} \in \nu_{int} X_{1}(a_{i}) = X_{2}(a_{i}) $
+\\$forall a_{i} \in \nu_{int} X_{1} >= 0$
+
+
+\subsection{Possible Optimisation}
+Create an equality for each term $x_{1} # x_{2}$ cost a lot due to the fact  that we have to iter
+over all variable from $\nu_{int}$ 
+Most of them can be avoid if we directly replace them in deed
+\\ $a \in (x_{1} \cup x_{2}) $ can be replace by $max(X_{1}(a),X_{2}(a)) > 0$ which is far better than
+$X_{1}UNIONX_{2}(a)>0 \wedge \bigwedge_{\nu_{int}} X_{1}UNIONX_{2}(i) = max(X_{1}(i),X_{2}(i))$
+However it might not be always possible.
+Case:? 
+
+

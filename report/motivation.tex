@@ -1,0 +1,44 @@
+%!TEX root = main.tex
+
+\section{Introduction}
+\label{sec:intro}
+
+Multi-set (aka bag) constraints are very useful for the specification of constraints over data structures.
+For example, the inductive definition of a binary search tree storing integer values rooted at $E$ and having the multi-set of values $M$ is
+specified by the following inductive definition in Separation Logic:
+\begin{align}
+\mathtt{bst}(E,M) &::= E = nil \land M=\bagone{} \\
+\mathtt{bst}(E,M) &::= \exists L, R, d.\ E\mapsto \{(\mathtt{left},L), (\mathtt{right}, R), (\mathtt{data}, d)\}  \\
+& \star \mathtt{bst}(L, M_L) \star \mathtt{bst}(R,M_R) \nonumber \\
+& \land E\neq nil \land M_L \le \bagone{d} < M_R \land M=M_L \bplus \bagone{d} \bplus M_R \nonumber
+\end{align}
+The first equation specifies the case of an empty tree, where the root $E$ is null and the parameter $M$ is an empty bag.
+The second equation specifies a non null node at location $E$ where the fields $\mathtt{left}$, $\mathtt{right}$, and $\mathtt{data}$ contain as values
+$L$, $R$, resp. $d$ (atom $E\mapsto \{(\mathtt{left},L), (\mathtt{right}, R), (\mathtt{data}, d)\}$).
+The locations $L$ and $R$ are roots of binary search trees of values in $M_L$ resp. $M_R$ (atoms $ \mathtt{bst}(L, M_L)$ resp.  $\mathtt{bst}(R,M_R)$),
+disjoint pairwise and from the node at $E$ (due to the use of the separation conjunction $\star$).
+The constraint between the multi-sets of values and the value $d$, $M_L \le \bagone{d} < M_R$, specifies that
+all values in the left sub-tree are less than $d$ and $d$ is strictly less than all values in the right sub-tree.
+%% see also ~\cite{DBLP:conf/csl/KuncakPS10}
+
+This report provides a detailed presentation of two decision procedures for checking satisfiability of quantifier-free formulas including
+linear integer constraints and
+constraints over multi-sets of integers. 
+The multi-set constraints include classical atoms, like multi-set inclusion or membership, as well as
+constraints ordering multi-sets with respect to their elements or constraining the minimum or maximum of a multi-set.
+
+The decision procedure is based on the rewriting of a multi-set formula $\varphi$ into
+an equi-satisfiable formula $\tilde{\varphi}$ in quantifier free logic of linear arithmetics.
+The latter logic is called QFLIA theory in SMTLIB format~\cite{SMTLIB10} and it is the input theory of very efficient solvers, e.g.,
+%CVC4 or Z3.
+CVC4~\cite{barrett2011cvc4} or Z3~\cite{de2008z3}.
+Moreover, because these solvers support also an extension of this theory with uninterpreted functions,
+we provide an alternative rewriting of $\varphi$ into this theory.
+\\
+\indent
+First, we define the logic \QFBILIA\ and its semantic~\cite{piskac2010decision}.
+Second, we explain the procedure reducing \QFBILIA\ formula to QFLIA~\cite{zarba2002combining}.
+Third, we explain the procedure reducing \QFBILIA\ formula to QFUFLIA.
+Finally, we discuss the implementation choices and some implemented optimisations.
+
+% \td{Plan of the report.}

@@ -1,0 +1,51 @@
+%!TEX root = main.tex
+
+\section{Multi-set Constraints in \spen}
+\label{sec:fspen}
+
+The theory of data used in the \spen\ solver combines the quantifier free theory of integers and quantifier free theory of multi-sets over integers.
+The comparison operation over integers is extended to multi-sets in the natural way
+($M_1\leq M_2$ iff any element of $M_1$ is less or equal to any element of $M_2$).
+The decision problems for this theory (satisfiability and entailment) have been shown decidable by reduction to the theory of integers with uninterpreted functions in~\cite{???} 
+Moreover, these results have been extended to the aforementioned theory with size constraints in~\cite{DBLP:conf/cade/PiskacK10}.
+We denote by $c$ the integer constants, 
+by $v,v_1,v_2,\ldots$ the integer variables (with values in $ZZ$), and 
+by $M,M_1,M_2,\ldots$ the multiset variables (with values in $\ZZ\rightarrow \NN$). 
+
+The theory of data used in \spen\ is defined by the following grammar:
+\begin{align*}
+e &::= 
+c ~\mid~     % constant
+v ~\mid~     % variable
+-e ~\mid~    % unary minus 
+e + e ~\mid~ % unary plus
+e - e ~\mid~ % binary minus
+\ite(\varphi,e,e)
+& \mbox{integer expressions} 
+\\[2mm]
+b &::= 
+\emptyset ~\mid~     % empty bag
+\bsingle(v) ~\mid~   % singleton bag
+M ~\mid~             % bag variable
+b \bplus b  ~\mid~   % bag union
+b \bminus b ~\mid~   % bag minus
+\ite(\varphi,b,b)
+& \mbox{multiset expressions}
+\\[2mm]
+\# &::=\ = ~\mid~ \neq ~\mid~ < ~\mid~ \leq ~\mid~ > ~\mid~ \geq 
+& \mbox{comparison operators} 
+\\[2mm]
+\varphi &::=
+true ~\mid~ 
+e \# e ~\mid~ % comparison of integers
+b \# b ~\mid~ % comparison of bag
+b \subset b ~\mid~ % subset of bags
+\varphi \land \varphi ~\mid~
+\varphi \limp \varphi 
+& \mbox{formulas}
+%\\[2mm]
+\end{align*}
+
+The translation to the SMTLIB2 theory AUFLIA is provided in~\cite{DBLP:conf/sigsoft/KapurMZ06}.
+
+

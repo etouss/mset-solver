@@ -1,0 +1,58 @@
+%
+% LaTeX style for LNCS proceedings (last version 2015/06/24 v2.20)
+\documentclass[orivec,a4]{llncs}
+
+\frontmatter          % for the preliminaries
+%\pagestyle{headings}  % switches on printing of running heads
+
+% Useful packages
+\usepackage{mypackages}
+
+%% USEFUL macros
+\input{mymacros}
+
+
+% Title
+\title{Deciding Ordering Constraints \\ on Multi-sets of Integers}
+
+% Authors
+
+\author{Etienne Toussaint\inst{1} \and Mihaela Sighireanu\inst{2}
+}
+\authorrunning{E. Toussaint \and M. Sighireanu}
+\institute{University of Edinburgh, UK \and
+University Paris Diderot, France}
+
+\begin{document}
+
+%%%%%%%%%%
+\maketitle
+\sloppy
+%%%%%%%%%%
+
+\input abstract-paper.tex
+
+%
+\input motivation-paper.tex
+
+\input logics-paper.tex
+
+\input fragment-simple-paper.tex
+
+\input fragment-order-paper.tex
+
+% \input fragment-card.tex
+
+\input fragment-impl-paper.tex
+
+\input conclusion.tex
+
+%\input acknow.tex
+
+%% USEFUL Bibliography
+\bibliographystyle{abbrv}
+\bibliography{dp-mset}
+
+\input appendix-paper.tex
+
+\end{document}

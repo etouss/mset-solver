@@ -1,0 +1,88 @@
+\clearpage
+\begin{appendices}
+\chapter{SMTLIB2 Syntax}
+\begin{center}
+\begin{tabular}{|c|c|}
+  \hline
+  Constraints & SMT-LIB2\\
+  \hline
+  $\lnot p $ & $(not \;p)$ \\
+  \hline
+  $p\wedge q$ & $(and \;p \;q)$ \\
+  \hline
+  $p \vee q$ & $(or \;p \;q)$ \\
+  \hline
+  $p\Rightarrow q$ & $(=> \;p \;q)$ \\
+  \hline
+  $a+b$ & $(+\;a\;b)$ \\
+  \hline
+  $a-b$ & $(-\;a\;b)$ \\
+  \hline
+  $ite\; p\; a\; b$ & $(ite\;p\;a\;b)$ \\
+  \hline
+  $max(a,b)$ & $(max\;a\;b)$ \\
+  \hline
+  $min(a,b)$ & $(min\;a\;b)$ \\
+  \hline
+  $a\leq b$ & $(<= \;a\;b)$ \\
+  \hline
+  $a < b$ & $(< \;a\;b)$ \\
+  \hline
+  $a\geq b$ & $(>= \;a\;b)$ \\
+  \hline
+  $a > b$ & $(> \;a\;b)$ \\
+  \hline
+  $a = b$ & $(= \;a\;b)$ \\
+  \hline
+  $a\neq b$ & $(neq \;a\;b)$ \\
+  \hline
+  $\llbracket a \rrbracket$ & $(bag \;a)$ \\
+  \hline
+  $\llbracket a \rrbracket^{n}$ & $(bagn \;a \;n)$ \\
+  \hline
+  $\llbracket \rrbracket$ & $emptybag$ \\
+  \hline
+  $x \cup y$ & $(bagunion \;x \;y)$ \\
+  \hline
+  $x \cap y$ & $(baginter \;x \;y)$ \\
+  \hline
+  $x \uplus y$ & $(bagsum \;x \;y)$ \\
+  \hline
+  $x \setminus y$ & $(bagminus \;x \;y)$ \\
+  \hline
+  $x = y$ & $(= \;x \;y)$ \\
+  \hline
+  $x \neq y$ & $(neq \;x \;y)$ \\
+  \hline
+  $x \subset y$ & $(subset \;x \;y)$ \\
+  \hline
+  $x \subseteq y$ & $(subseteq \;x \;y)$ \\
+  \hline
+  $x \nsubseteq y$ & $(nsubseteq \;x \;y)$ \\
+  \hline
+  $x \in y$ & $(in \;x \;y)$ \\
+  \hline
+  $x \in^{n} y$ & $(inn \;x \;y \;n)$ \\
+  \hline
+  $x \notin y$ & $(ni \;x \;y)$ \\
+  \hline
+  $ite \;p \;x \;y$ & $(ite\;p\;x\;y)$ \\
+  \hline
+  $max(x)$ & $(bagmax \;x )$ \\
+  \hline
+  $min(x)$ & $(bagmin \;x )$ \\
+  \hline
+  $x \leq y$ & $(<= \;x \;y)$ \\
+  \hline
+  $x \geq y$ & $(>= \;x \;y)$ \\
+  \hline
+  $x > y$ & $(> \;x \;y)$ \\
+  \hline
+  $x < y$ & $(< \;x \;y)$ \\
+  \hline
+
+
+  % $=$, $\neq$, $\subset$, $\subseteq$
+\end{tabular}
+\end{center}
+\end{appendices}

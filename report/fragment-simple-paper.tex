@@ -1,0 +1,210 @@
+%!TEX root = paper.tex
+
+\section{Decision Procedure by Reduction to QFLIA}
+\label{sec:fsimple}
+
+This decision procedure checks the satisfiability of a \QFBILIA\ formula $F$ in four steps.
+These steps are removing gradually the multi-set atoms to obtain an equi-satisfiable formula in quantifier free linear arithmetics, i.e., the QFLIA theory of SMTlib.
+
+The first step translates $F$ into a $\QFBILIA_\nnf$ formula $\tilde{F}$ which is equivalent with $F$, from  Proposition~\ref{prop:nnf}.
+The second step transforms $\tilde{F}$ into an semi-equivalent formula $\tilde{F}^2$ in $\QFBILIA_{pure}$, from  Proposition~\ref{prop:pure}.
+The third step introduces two extremum variables to represent $\bot$ and $\top$, two sets of fresh integer variables to represent
+(i) the elements that validates atoms $x\neq y$ and $x\nsubseteq y$ and
+(ii) for each multi-set variable $x\in V_{bag}(\tilde{F}^2)$ and integer variable $a\in V_{int}(\tilde{F}^2)$, resp. extremum variable $m\in V_{ext}(\tilde{F}^2)$,
+ an integer variable $w_{a,x}$, resp. $w_{m,x}$ counting the occurrences of values of $a$, resp. $m$ in $x$.
+This step only adds to $\tilde{F}^2$ a formula $F_3$ over integer variables. The formula $\tilde{F}^2 \land F_3$ is then equi-satisfiable to $F$.
+The fourth step removes multi-set terms from $\tilde{F}^3$ using the fresh integer variables introduced by the counting abstraction and produces a formula $\tilde{F}^4 \land F_3$ equi-satisfaisable to $F$.
+
+
+
+\subsection{First Step: Translation to $\QFBILIA_\nnf$}
+\label{ssec:dp-s1}
+
+The correctness of this step is stated by the following proposition whose proof gives a procedure to build a formula $\tilde{F}$ in $\QFBILIA_\nnf$ from a formula $F$ in \QFBILIA. The proof in provided in Appendix~\ref{proof:prop:nnf}.
+
+\begin{myprop}
+\label{prop:nnf}
+For any $F$ formula in \QFBILIA, there exists a formula $\tilde{F}$ in $\QFBILIA_\nnf$ over a set of variables
+$V_{int}(F)\cup V^\nnf_{int}$ and $V_{bag}(F)\cup V^\nnf_{bag}$ such that
+(i) any model of $\tilde{F}$ is a model of $F$ and
+(ii) for any model of $F$, there is a model of $\tilde{F}$ that agrees on $V_{int}(F)$ and $V_{bag}(F)$.
+\end{myprop}
+
+% \begin{comp}
+% The $\nnf$ function is clearly linear among atom of the formula $\tilde{F}$ as we only deal with them once
+% $\sigma(\nnf) = \sigma(|L(\tilde{F})|)$.
+% The rewritting of $\ite(F',T^1, T^2)$ have to be avoid as much as possible, indeed let's denote $F_{b}$ the formula with $\ite(F',T^1, T^2)$ and $F_{a}$ the equivalent formula without $\ite(F',T^1, T^2)$
+% then $|L(F_{a})| = |L(F_{b})| + 6 + |L(F')|$.
+% see section \ref{sec:implementation}.
+% \td{changer sigma}
+% \end{comp}
+
+
+
+\subsection{Second Step: Translation to $\QFBILIA_{pure}$}
+\label{ssec:dp-s2}
+
+The step applies the following sequence of transformations on $\tilde{F}$ in $\QFBILIA_\nnf$:
+\begin{enumerate}
+\item[S2.1:] Every bag atom $T^1 \prec T^2$ constraint (with $\prec \in \{<,\ge\}$) is rewritten using the $\min$ and $\max$ extremum terms as follows:
+\begin{itemize}
+\item $T^1 \geq T^2$ becomes $\min(T^1) \geq \max(T^2)$
+\item $T^1 <    T^2$ becomes $\max(T^1) < \min(T^2)$
+\end{itemize}
+Thus, the bag atom becomes an extremum atom.
+Let denote by $\tilde{F}_{2.1}$ the result of this process.
+
+\item[S2.2:] Every $T_{bag}$ term used in \emph{integer, mixed, extremum} atoms which is not a variable is replaced by a fresh multi-set variable $x$ and the multi-set atom $x=T_{bag}$ is conjuncted to $\tilde{F}_{2.1}$.
+Let us denote by $\tilde{F}_{2.2}$ the result of this process and by $V^{2.2}_{bag}$ the set of fresh bag variables.
+
+\item[S2.3:] Every extremum term of the form $\min(x)$ or $\max(x)$ is replaced by a fresh extremum variable $\min_x$ rep. $\max_x$ and the mixed atom $\min(x) = \min_x$ is conjuncted to $\tilde{F}_{2.2}$.
+Let us denote by $\tilde{F}_{2.3}$ the result of this process and by $V^{2.3}_{ext}$ the set of fresh extremum variables.
+
+\item[S2.4:] Every bag atom $L_{bag}$ of $\tilde{F}_{2.3}$ using more than two bag variables for operations $\neq, \subseteq, \nsubseteq$ and more than three variables for operation $=$ are iteratively rewritten to be reduced to the bag atoms in $\QFBILIA_{pure}$. Notice that integer, mixed and extremum atoms already use only bag variables and not bag terms due to the step S2.2.
+So, at the end of this step, the resulting formula $\tilde{F}_{2.4}$ is in the $\QFBILIA_{pure}$ fragment. The set of fresh bag variables is denoted by $V^{2.4}_{bag}$
+\end{enumerate}
+The formula $\tilde{F}_{2.4}$ has the set of integer variables $V_{int}(\tilde{F})$,
+the set of extremum variables $V_{ext}(\tilde{F}) \cup V^{2.3}_{ext}$ and
+the set of bag variables $V_{bag}(\tilde{F}) \cup V^{2.2}_{bag} \cup V^{2.4}_{bag}$.
+
+\begin{myex}
+%\td{Explain why this example is given here.}
+We explain the previously mentioned steps on the following $\QFBILIA_\nnf$ formula:
+$$\min(x \cup y \cup z) = \min(x \cap y \cap z).$$ 
+It is translated in the following $\QFBILIA_{pure}$ formula over the set of bag variables $\{x,y,z\}\cup\{xunionyunionz,yunionz,xinteryinterz,yinterz\}$
+and the set of integer variables $\{min_{xunionyunionz},min_{xinteryinterz}\}$ :
+\begin{align*}
+min_{xunionyunionz} = min_{xinteryinterz} \ \land \\
+  min_{xunionyunionz} = min(xunionyunionz) \  \land \\
+  min_{xinteryinterz} = min(xinteryinterz) \ \land \\
+  xunionyunionz = x \cup yunionz \ \land
+  yunionz = y \cup z \ \land \\
+  xinteryinterz = x \cap yinterz \ \land
+  yinterz = y \cap z
+\end{align*}
+\end{myex}
+
+The correctness of this transformation with respect to the semi-equivalence  is stated by the following result, which proof is given in the appendix.
+
+\begin{myprop}
+\label{prop:pure}
+For any $\tilde{F}$ formula in $\QFBILIA_\nnf$, there exists a formula $\tilde{F}^2$ in $\QFBILIA_{pure}$ over a set of variables
+$V_{int}(\tilde{F})$, $V_{ext}(\tilde{F})\cup V^p_{ext}$ and $V_{bag}(\tilde{F})\cup V^p_{bag}$ such that
+(i) any model of $\tilde{F}^2$ is a model of $\tilde{F}$ and
+(ii) for any model of $\tilde{F}$, there is a model of $\tilde{F}^2$ that agrees on $V_{int}(\tilde{F})$ and $V_{bag}(\tilde{F})$.
+\end{myprop}
+
+
+\subsection{Third Step: Introducing the Counting Abstraction}
+
+This step adds to $\tilde{F}^2$ a formula $F_3$ that introduces the integer variables which will replace the multi-set variables. The transformation has three steps:
+
+\begin{enumerate}
+\item[S3.1:] Build the set $V^{31}_{int}$ as a set of fresh variables, one variable for each atom $(x \neq y)$ or $(x \nsubseteq y)$ in $\tilde{F}^2$.
+We denote these variables by $a_{x \neq y}$, resp. $a_{x \nsubseteq y}$.
+Intuitively, these variables are introduced to be able to express the fact that there is a value on which $x$ and $y$ differ, resp. $x$ has more copies than $y$ (see subsection \ref{subsec:rewritting qflia}).
+
+\item[S3.2:] We introduce two fresh extremum variables $m_{\bot}$ and $m_{\top}$.
+Intuitively, these variables are introduced to be able to express $\bot$, resp. $\top$.
+
+\item[S3.3:] Build the set
+$$V^{33}_{int}  =
+\bigcup_{x\in V_{bag}(\tilde{F}^2), a\in  V^{31}_{int}\cup V_{int}(\tilde{F}^2)} w_{a,x},$$
+where an integer variable is added for each pair of bag variable $x$ and integer variable $a$ in order to represent the number of element $a$ in $x$.
+$$V^{33}_{ext}  =
+\bigcup_{x\in V_{bag}(\tilde{F}^2), m\in  V_{ext}(\tilde{F}^2)} w_{m,x},$$
+where an integer variable is added for each pair of bag variable $x$ and extremum variable $m$ in order to represent the number of element $m$ in $x$.
+Let $V^3_{int} = V_{int}(\tilde{F}^2) \cup V^{31}_{int}$.
+Let $V^3_{ele} = V^3_{int} \cup V_{ext}(\tilde{F}^2)$.
+
+The formula $\tilde{F}^3$ is built as follows:
+\begin{small}\begin{align}
+  \tilde{F}^3 \triangleq &\
+  \tilde{F}^2 \land F_{3} \\
+  F_{3 } \triangleq &\
+  \left(\bigwedge_{a \in V^{3}_{int}}(m_{\bot} < a < m_{\top})\right)
+  \\
+  & \land
+  \left(\bigwedge_{m \in V_{ext}(\tilde{F}^2)}(m_{\top} \ge m \ge m_{\bot})\right)
+  \\
+  & \land
+  %\bigwedge_{x \in V_{bag}(\tilde{F}^2)}\left(\land_{a\in V^3_{int}}w_{a,x} \ge 0\right)  WRONG DU TO w_{w_a,x,x}
+  \left(\bigwedge_{w \in V^{33}_{int}\cup V^{33}_{ext}}(w \ge 0)\right)
+  \\
+  & \land
+  \left(\bigwedge_{t,u \in V^3_{ele}}\left(\bigwedge_{x\in V_{bag}(\tilde{F}^2)}(t \neq u) \lor (w_{t,x} = w_{u,x})\right)\right)
+\end{align}
+\end{small}
+The set of variables of $\tilde{F}^3$ are $V_{int}(\tilde{F}^3)$, resp. $V_{ext}(\tilde{F}^3)$, resp. $V_{bag}(\tilde{F}^2)$.
+\end{enumerate}
+
+The following property states that $\tilde{F}^3 \sim_{sat} \tilde{F}^2$:
+\begin{myprop}
+\label{prop:countabs}
+The formula $\tilde{F}^3$ is in $\QFBILIA_{pure}$ and
+(i) any model of $\tilde{F}^3$ is a model of $\tilde{F}^2$ and
+(ii) for any model of $\tilde{F}^2$, there is a model of $\tilde{F}^3$ that agrees on $V_{int}(\tilde{F}^2)$, $V_{ext}(\tilde{F}^2)$ and $V_{bag}(\tilde{F}^2)$.
+\end{myprop}
+
+\subsection{Fourth Step: Removing Multi-set Constraints}
+\label{subsec:rewritting qflia}
+This step rewrites the bag atoms and the mixed atoms in order to remove the bag terms and so transforms $\tilde{F}^3$ to a formula in QFLIA.
+The transformation preserves the boolean structure of the initial formulas and the integer atoms.
+It is given by the $S4$ function defined in Figure~\ref{fig:S4}.
+
+\begin{figure}
+\begin{mdframed}
+  \fontsize{9}{6}
+%\begin{align*}
+% f1,f2 \in F,S4(F_1 \land F_2) \triangleq &\ \   S4(f1) \land S4(f2) \\
+% f1,f2 \in F,S4(F_1 \lor F_2)  \triangleq &\ \   S4(f1) \lor S4(f2)
+%\end{align*}
+%
+Translation of mixed atoms:
+%J'ai un soucis le V_{int}(\tilde{F}^3)}{\bigwedge} car c'est faut il va itéré sur les w aussi :s
+%Mais V^3_{int} n'existe pas :s ou je sais pas :s
+\begin{align*}
+ S4(m = max(x))  \triangleq &\ \   \left((m = m_{\bot}) \land \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = 0)\right) \lor
+ \\ & \ \  \left((m \neq m_{\bot}) \land (m \neq m_{\top}) \land (w_{m,x} \ge 1) \land \underset{t\in V^3_{ele}}{\bigwedge}((t \le m)  \lor (w_{t,x} = 0))\right)
+\\
+  S4(m = min(x))  \triangleq &\ \   \left((m = m_{\top}) \land \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = 0)\right) \lor
+  \\ & \ \  \left((m \neq m_{\bot}) \land (m \neq m_{\top}) \land (w_{m,x} \ge 1) \land \underset{t\in V^3_{ele}}{\bigwedge}((t \ge m)  \lor (w_{t,x} = 0))\right)
+\\
+ S4(a \in x )    \triangleq &\ \   w_{a,x} \ge 1 \\
+ S4(a \in^{n} x) \triangleq &\ \   w_{a,x} \ge n \\
+ S4(a \notin x ) \triangleq &\ \   w_{a,x} = 0 \\
+ S4(a \notin^{n} x )  \triangleq &\ \   w_{a,x} < n
+ \\
+  S4(m \in x )    \triangleq &\ \   (m = m_{\bot} \lor m = m_{\top}) \land \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = 0) \lor w_{m,x} \ge 1 \\
+  S4(m \in^{n} x) \triangleq &\ \   m \neq m_{\bot} \land m \neq m_{\top} \land w_{m,x} \ge n \\
+  S4(m \notin x ) \triangleq &\ \   (m \neq m_{\bot} \land m \neq m_{\top}) \lor \underset{t\in V^3_{ele}}{\bigvee}(w_{t,x} \neq 0) \land w_{m,x} = 0 \\
+  S4(m \notin^{n} x )  \triangleq &\ \   m = m_{\bot} \lor m = m_{\top} \lor w_{m,x} < n
+\end{align*}
+
+Translation of bag atoms:
+
+\begin{align*}
+ S4(x = y)           \triangleq &\ \   \underset{t \in V^3_{ele}}{\bigwedge}(w_{t,x} = w_{t,y})   \\
+ S4(x \subseteq y)   \triangleq &\ \   \underset{t \in V^3_{ele}}{\bigwedge}(w_{t,x} \le w_{t,y})   \\
+ S4(x \neq y)        \triangleq &\ \   w_{a_{x \neq y},x} \neq w_{a_{x \neq y},y}   \\
+ S4(x \nsubseteq y)  \triangleq &\ \   w_{a_{x \nsubseteq y},x} > w_{a_{x \nsubseteq y},y}   \\
+ S4(x = \bagone{} )  \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = 0)  \\
+ S4(x = \bagone{a})  \triangleq &\ \   (w_{a,x} = 1)  \land \underset{t\in V^3_{ele}}{\bigwedge}((a = t) \lor (w_{t,x} = 0))    \\
+ S4(x = y \cup z)    \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = max(w_{t,y},w_{t,z}))   \\
+ S4(x = y \cap z)    \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = min(w_{t,y},w_{t,z}))   \\
+ S4(x = y \uplus z)   \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = w_{t,y}+w_{t,z})   \\
+ S4(x = y \setminus z) \triangleq &\ \   \underset{t\in V^3_{ele}}{\bigwedge}(w_{t,x} = \max(0,(w_{t,y}-w_{t,z})))
+\end{align*}
+\caption{Translation of mixed and bags atoms}
+\label{fig:S4}
+\end{mdframed}
+\end{figure}
+
+\begin{myprop}
+\label{prop:final}
+The formula $\tilde{F}^4 = S4(\tilde{F}^3)$ is in QFLIA and
+%De meme c'est vrai si w = 0 pour tout w par exemple. on doit imposer la creation des w
+(i) for any model of $I$ of $\tilde{F}^3$ there is a model $I'$ of $\tilde{F}^4$ such that $I$ and $I'$ agree on $V^3(\int)$.
+(ii) for any model $I$ of $\tilde{F}^4$, there is a model $I'$ of $\tilde{F}^3$ such that $I$ and $I'$ agree on $V_{int}(\tilde{F}^3)$.
+\end{myprop}
+

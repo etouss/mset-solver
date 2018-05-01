@@ -1,0 +1,22 @@
+(set-logic QF_SLRDI)
+(declare-fun emptybag () BagInt)(declare-fun M0 () BagInt)
+(declare-fun M1 () BagInt)
+(declare-fun key () Int)
+(declare-fun ret () Int)
+(declare-fun ?M2_31 () BagInt)
+(assert (and 
+ 	(= M1 emptybag )
+ 	(=> (subset (bag key ) M0 )(subset (bag key ) M1 ))
+ 	(=> (subset (bag key ) M1 )(subset (bag key ) M0 ))
+ 	(= ret 0 )
+ )
+ ) 
+ (assert (not 
+(and 
+ 	(= M1 emptybag )
+ 	(= (bagminus M0 (bag key ) ) M0 )
+ 	(= ret 0 )
+ )
+ ) 
+)
+(check-sat)

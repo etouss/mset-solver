@@ -1,0 +1,289 @@
+%!TEX root = paper.tex
+
+\section{Decision Rrocedure by reduction to QFLIA}
+\label{app:fsimple}
+
+
+\subsection{Proof of Proposition~\ref{prop:nnf}}
+\label{proof:prop:nnf}
+
+%\begin{myprop}
+%For any $F$ formula in \QFBILIA, there exists a formula $\tilde{F}$ in $\QFBILIA_\nnf$ over a set of variables
+%$V_{int}(F)\cup V^\nnf_{int}$ and $V_{bag}(F)\cup V^\nnf_{bag}$ such that
+%(i) any model of $\tilde{F}$ is a model of $F$ and
+%(ii) for any model of $F$, there is a model of $\tilde{F}$ that agrees on $V_{int}(F)$ and $V_{bag}(F)$.
+%\end{myprop}
+
+\begin{proof}
+The proof is given by construction of $\tilde{F}$ from $F$.
+
+% First every term $\ite(F',T^1, T^2)$ is replaced by the formula
+% \\$(F' \cup T^2) \land (\neg F' \cup T^1)$
+First, every integer term $\ite(F',T^1, T^2)$ is replaced by a fresh integer variable $a$ (i.e., not in $V_{int}(F)$)
+and $F$ is rewritten in $F \land (F' \limp a=T^1) \land \big((\lnot F') \limp (a=T^2)\big)$.
+The same procedure is applied for $\ite$ terms in multi-set atoms.
+Using the semantics of $\ite$ terms, we show that the formula $\tilde{F}$ obtained by this rewriting satisfies the conclusion of the theorem.
+
+Second, we apply to $\tilde{F}$ the de Morgan's rules to eliminate the negation by pushing them at the level of literals.
+We definite inductively on the formula syntax a function nnf of $\QFBILIA \flc \QFBILIA_\nnf$,
+for any $F_1,F_2 \in \QFBILIA$ and $\ell\in L$, as follows:
+\begin{small}
+\begin{flalign}
+  \nnf(F_1 \limp F_2)  &=    \nnf(\lnot F_1) \lor \nnf(F_2)    \\
+  \nnf(\lnot(F_1 \limp F_2))  &=    \nnf(F_1) \land \nnf(\lnot F_2)    \\
+  \nnf(F_1 \lor F_2)    &= \nnf(F_1) \lor \nnf(F_2)   \\
+  \nnf(\lnot (F_1 \lor F_2)  &=   \nnf(\lnot F_1) \land \nnf(\lnot F_2)   \\
+  \nnf(F_1 \land F_2)  &=   \nnf(F_1) \land \nnf(F_2)   \\
+  \nnf(\lnot (F_1 \land F_2)  &=    \nnf(\lnot F_1) \lor \nnf(\lnot F_2)   \\
+  \nnf(\lnot\lnot F)  &= \nnf(F)   \\
+  \nnf(\ell)  &= \ell   \\
+  \nnf(\lnot \ell)  &=    \tilde{\ell} \mbox{ i.e., the opposite atom of }\ell 
+\end{flalign}
+\end{small}
+Since any atom has its opposice in $\QFBILIA_\nnf$, and since $(F\land F)$, $(F \lor F)$ are also formulas in $\QFBILIA_\nnf$, then
+$\nnf(F) \in \QFBILIA_\nnf$, (for instace $\lnot (T_{int}^1 < T_{int}^2)$ is replaced by $(T_{int}^1 \geq T_{int}^2)$).
+\end{proof}
+
+% \begin{comp}
+% The $\nnf$ function is clearly linear among atom of the formula $\tilde{F}$ as we only deal with them once
+% $\sigma(\nnf) = \sigma(|L(\tilde{F})|)$.
+% The rewritting of $\ite(F',T^1, T^2)$ have to be avoid as much as possible, indeed let's denote $F_{b}$ the formula with $\ite(F',T^1, T^2)$ and $F_{a}$ the equivalent formula without $\ite(F',T^1, T^2)$
+% then $|L(F_{a})| = |L(F_{b})| + 6 + |L(F')|$.
+% see section \ref{sec:implementation}.
+% \td{changer sigma}
+% \end{comp}
+
+
+\subsection{Proof of Proposition~\ref{prop:pure}}.
+\label{app:proof:pure}
+
+%\begin{myprop}
+%For any $\tilde{F}$ formula in $\QFBILIA_\nnf$, there exists a formula $\tilde{F}^2$ in $\QFBILIA_{pure}$ over a set of variables
+%$V_{int}(\tilde{F})$, $V_{ext}(\tilde{F})\cup V^p_{ext}$ and $V_{bag}(\tilde{F})\cup V^p_{bag}$ such that
+%(i) any model of $\tilde{F}^2$ is a model of $\tilde{F}$ and
+%(ii) for any model of $\tilde{F}$, there is a model of $\tilde{F}^2$ that agrees on $V_{int}(\tilde{F})$ and $V_{bag}(\tilde{F})$.
+%\end{myprop}
+
+\begin{proof}
+The proof is given by construction of $\tilde{F}^2$ from $\tilde{F}$ following the steps S2.1--4 above.
+
+The formula $\tilde{F}_{2.1}$ is equivalent to $\tilde{F}$ due to the definition of the semantics of comparison operations over multi-sets.
+
+The formula $\tilde{F}_{2.2}$ is built over the set of variables
+$V_{int}(\tilde{F})$ and $V_{bag}(\tilde{F})\cup V^{2.2}_{bag}$
+where $V^{2.2}_{bag}$ is the set of fresh variables used to replace multi-set terms which are not variables in integer, extremum or mixed atoms. The semantics of equality between bags ensures that the equi-satisfiability is preserved.
+
+The formula $\tilde{F}_{2.3}$ is built over the set of variables
+$V_{int}(\tilde{F}_{2.2})$, $V_{ext}(\tilde{F}_{2.2})\cup V^{2.3}_{ext}$ and $V_{bag}(\tilde{F}_{2.2})$
+where $V^{2.3}_{ext}$ is the set of fresh variables used to replace extremum term of the form $\min(x)$ or $\max(x)$. The semantics of equality between integer ensures that the equi-satisfiability is preserved.
+
+The formula $\tilde{F}_{2.4}$ is built over the set of variables
+$V_{int}(\tilde{F}_{2.3})$ and $V_{bag}(\tilde{F}_{2.3})\cup V^{2.4}_{bag}$
+where $V^{2.4}_{bag}$ is the set of fresh variables used to replace multi-set terms in bag atoms which don't fit in the $\QFBILIA_{pure}$ fragment. The semantics of equality between bags ensures that the equi-satisfiability is preserved, i.e., the two conclusions are valid.
+
+The formula $\tilde{F}^2 = \tilde{F}_{2.4}$ is in $\QFBILIA_{pure}$ and the two conclusions are valid as a consequence of steps S2.1--4.
+
+%\td{improve and continue the proof}
+\end{proof}
+
+% \begin{comp}
+%   The procedure described in steps S2.1--4 can be done in a single treatement as consequence this step is linear among atom of $\tilde{F}$
+%   $\sigma(S2) = \sigma(|L(\tilde{F})|)$.
+%   However $|L(\tilde{F})| < |L(\tilde{F}^2)|$ indeed S2.2--4 generate variables and equalities are conjuncted.
+%   see section \ref{sec:implementation}.
+%   \td{sigma other}
+% \end{comp}
+
+\subsection{Proof of Proposition~\ref{prop:countabs}}.
+\label{app:proof:countabs}
+%\begin{myprop}
+%\label{prop:countabs}
+%The formula $\tilde{F}^3$ is in $\QFBILIA_{pure}$ and
+%(i) any model of $\tilde{F}^3$ is a model of $\tilde{F}^2$ and
+%(ii) for any model of $\tilde{F}^2$, there is a model of $\tilde{F}^3$ that agrees on $V_{int}(\tilde{F}^2)$, $V_{ext}(\tilde{F}^2)$ and $V_{bag}(\tilde{F}^2)$.
+%\end{myprop}
+
+\begin{proof}
+Clearly $\tilde{F}^3$ is still in $\QFBILIA_{pure}$.
+
+Moreover, because $\tilde{F}^3 \triangleq \tilde{F}^2 \land F_{3}$, any model $I$ of $\tilde{F}^3$ is also a model of $\tilde{F}^2$.
+
+We prove now the point (ii):
+\begin{enumerate}
+\item[A.1:] $I$ be a model of $\tilde{F}^2$
+\item[C.1:] There is $I'$ which agrees on $V(\tilde{F}^2)$ to $I$ and $I'$ is a model of $\tilde{F}^3$.
+\end{enumerate}
+Proof:
+\begin{enumerate}
+\item[1:] Let $I'=(I_{bag}, I'_{int}, I'_{ext})$ such that for any $a\in V_{int}(\tilde{F}^3)$ we have
+$$
+I'_{int}(a) \triangleq \left\{
+\begin{array}{ll}
+I_{int}(a) & \mbox{ if } a \in V_{int}(\tilde{F}^2) \\
+v & \mbox{ if } a_{x\neq y} \in V^{31}_{int} \mbox{ and } I_{bag}(x)(v) \neq I_{bag}(y)(v) \\
+v & \mbox{ if } a_{x\nsubseteq y} \in V^{31}_{int} \mbox{ and } I_{bag}(x)(v) > I_{bag}(y)(v) \\
+I_{bag}(x)(b) & \mbox{ if } a \equiv w_{b,x} \in V^{32}_{int} \\
+0 & \mbox{ otherwise} %Cas utile si I_{bag}(x)(v) \neq I_{bag}(y)(v) n'existe pas 0 n'importe quelle valeur fonctionne
+\end{array}\right.
+$$
+for any $m\in V_{ext}(\tilde{F}^3)$ we have
+$$
+I'_{ext}(m) \triangleq \left\{
+\begin{array}{ll}
+I_{ext}(m) & \mbox{ if } m \in V_{ext}(\tilde{F}^2) \\
+k & \mbox{ if } m_{\bot} \mbox{ and } \forall a \in V_{int}(\tilde{F}^3), k<I'_{int}(a) \\
+& \quad\quad\quad \mbox{ and } \forall m \in V_{ext}(\tilde{F}^3), k\leq I'_{ext}(m)\\
+k & \mbox{ if } m_{\top} \mbox{ and } \forall a \in V_{int}(\tilde{F}^3), k>I'_{int}(a) \\
+& \quad\quad\quad \mbox{ and } \forall m \in V_{ext}(\tilde{F}^3), k\geq I'_{ext}(m)\\
+\end{array}\right.
+$$
+
+This valuation of integer and extremum variables satisfies the part $\tilde{F}^2$ of $\tilde{F}^3$ by (A.1)
+and it satisfies the $F_{3}$ part by the properties of $I_{bag}$.
+Thus, C.1. is satisfied.
+\end{enumerate}
+\end{proof}
+
+% \begin{comp}
+% First of all the procedure described above adds a variable for each atom $(x \neq y)$ or $(x \nsubseteq y)$ in $\tilde{F}^2$.
+% Then the procedure adds $|V_{bag}(\tilde{F}^2)| * |V^{31}_{int}\cup V_{int}(\tilde{F}^2)|$ variables.
+% Finaly the procedure conjuncted $|V^{31}_{int}\cup V_{int}(\tilde{F}^2)|^{2} * |V_{bag}(\tilde{F}^2)|$ atoms to the formula.
+% Then it is interesting to be abled to reduce $|V_{int}(\tilde{F}^2)|$, $|V^{31}_{int}|$ and $|V_{int}(\tilde{F}^2)|$ to a minimum (see section \ref{sec:implementation}).
+% \end{comp}
+
+\subsection{Proof of Proposition~\ref{prop:final}}.
+\label{app:proof:final}
+%
+%\begin{myprop}
+%\label{prop:final}
+%The formula $\tilde{F}^4 = S4(\tilde{F}^3)$ is in QFLIA and
+%%De meme c'est vrai si w = 0 pour tout w par exemple. on doit imposer la creation des w
+%(i) for any model of $I$ of $\tilde{F}^3$ there is a model $I'$ of $\tilde{F}^4$ such that $I$ and $I'$ agree on $V^3(\int)$.
+%(ii) for any model $I$ of $\tilde{F}^4$, there is a model $I'$ of $\tilde{F}^3$ such that $I$ and $I'$ agree on $V_{int}(\tilde{F}^3)$.
+%\end{myprop}
+
+\begin{proof}
+Clearly $\tilde{F}^4$ is in QFLIA from the definition of $S4$.
+
+Point (i): Because $S4$ does not rewrite integer atoms, a model $I$ of $\tilde{F}^3$ satisfies, with its integer valuation $I_{int}$, the integer atoms not rewritten by $S4$.
+The integer atoms introduced by $S4$ are conform with the semantics of formulas while interpreting the variables $w_{*,x}$ as counting abstractions of a bag $x$.
+Then if $I$ does not interpret the variables $w_{*,x}$ as counting abstractions of a bag $x$, we construct $I'$ such that it does and agree on $V^3_{int}$ with $I$.
+If $x \neq y$ is satisfied then there exists a value $v$ in $\ZZ$ such as $I_{bag}(x)(v) \neq I_{bag}(y)(v)$. By the choice of $I_{int}$ in the 3rd step (i.e., it satisfies $F_3$), we have that $I_{int}(a_{x\neq y}) = v$
+If $m = max(x)$ is satisfied then either $I_{bag}(x) = \bagone{} $ and $I_{ext}(m) = I_{ext}(m_{\bot})$, or $I_{ext}(m)$ is the greatest integer of $\mathcal{D}(I_{bag}(x))$ but different from $I_{ext}(m_{\bot})$ and $I_{ext}(m_{\top})$.
+
+Point (ii):
+\begin{enumerate}
+\item[A.1] $I$ is a model of $S4(\tilde{F}^3)$
+\item[C.1] there is a model $I'$ of $\tilde{F}^3$ that agrees on $V_{int}(\tilde{F}^3)$ with $I$
+\end{enumerate}
+
+Proof:
+\begin{enumerate}[1.]
+\item %[1.]
+$I_{int}$ satisfies the $F_3$ component of $\tilde{F}^3$ which is preserved as it is by $S4$.
+By the definition of $S4$, $V_{int}(\tilde{F}^3) = V_{int}(S4(\tilde{F}^3))$.
+
+\item %[2.]
+We define a valuation of bag variables in $\tilde{F}^3$, $I'_{bag}$ as follows:
+%Same issue V_{int}(\tilde{F}^3)
+$$
+I'_{bag}(x)(v) \triangleq \left\{\begin{array}{ll}
+I_{int}(w_{a,x}) & \mbox{ if } v = I_{int}(a) \mbox{ for some }a\in V^3_{int} \\
+I_{int}(w_{m,x}) & \mbox{ if } v = I_{ext}(m) \mbox{ for some }m\in V^3_{ext} \\
+0 & \mbox{ otherwise}
+\end{array}\right.
+$$
+Then $I'_{bag}$ is a well funded function.
+
+Proof: By the fact that $I_{int}$ satisfies the constraint $F_3$, which means that values of $w_{a,x}$ and $w_{b,x}$ are the same if $I_{int}(a)=I_{int}(b)$.
+
+\item %[3.]
+$I'=(I_{int}(\tilde{F}^3),I'_{bag})$ is a model of $S4(\tilde{F}^3)$.
+
+Proof: The proof proceeds by induction on the form of atoms transformed by $S4$. We show only the main points of the induction, the others are done similarly.
+
+
+
+\begin{enumerate}[3.1]
+\item %[3.1:]
+for $L_{mix} ::=\ m = \max(x)$, if $I \models S4(L_{mix})$ then $I'\models L_{mix}$ (and vice versa). \\
+
+\begin{enumerate}[$\mbox{3.1.}1$]
+\item %[3.1.1:]
+If $I_{bag}(x) \neq \bagone{}$ : \\
+\begin{enumerate}[$\mbox{3.1.1.}1$]
+\item %[3.1.1.1:]
+From definition of $S4(L_{mix})$, $I_{int}(w_{m,x}) \ge 1$ and $I_{ext}(m) \neq I_{ext}(m_{\bot})$ and $I_{ext}(m) \neq I_{ext}(m_{\bot})$.
+
+\item %[3.1.1.2:]
+From 3.1.1.1 and the definition of $I'_{bag}$, $I_{ext}(m) \in \mathcal{D}(I_{bag}(x))$.
+
+\item %[3.1.1.3:]
+There is no value $v$ in $\mathcal{D}(I_{bag}(x))$ greater than $I_{ext}(m)$
+
+   By absurd, suppose that such a value exists, i.e., $v > I_{ext}(m)$ and $v \in \mathcal{D}(I_{bag}(x))$.
+
+   From the definition of $I'_{bag}$, there exists $t\in V^3_{ele}$ such as $I_{int}(t)=v > I_{ext}(m)$ or $I_{ext}(t)=v > I_{ext}(m)$  and $v = I_{int}(w_{t,x}) > 0$.
+
+   This is in contradiction with the $S4(L_{mix})$ conjunct saying that $t\le a \lor w_{t,x}=0$.
+\end{enumerate}
+\item %[3.1.2:]
+If $I_{bag}(x) = \bagone{}$ : \\
+\begin{enumerate}[$\mbox{3.1.2.}1$]
+\item From definition of $S4(L_{mix})$, $I_{ext}(m) = I_{ext}(m_{\bot})$.
+\end{enumerate}
+\end{enumerate}
+%usefull ? we admit in first step ?
+The reverse direction is shown similarly.
+
+Hence, 3.1 is valid.
+
+
+\item %[3.2:]
+for $L_{bag}::=\ x = y\cup z$, if $I \models S4(L_{bag})$ then $I'\models L_{bag}$ (and vice versa). \\
+
+\begin{enumerate}[3.2.1]
+\item %[3.1.1:]
+From definition of $S4(L_{bag})$,
+$$\underset{t\in V^3_{ele}}{\bigwedge}(I_{int}(w_{t,x}) = max(I_{int}(w_{t,y}),I_{int}(w_{t,z}))).$$
+
+\item %[3.1.2:]
+From 3.2.1 and the definition of $I'_{bag}$,
+$$\underset{t\in V^3_{ele}}{\bigwedge}(I'_{bag}(x)(I_{int}(t)) = max(I'_{bag}(y)(I_{int}(t)),I'_{bag}(z)(I_{int}(t)))).$$
+or $$\underset{t\in V^3_{ele}}{\bigwedge}(I'_{bag}(x)(I_{ext}(t)) = max(I'_{bag}(y)(I_{ext}(t)),I'_{bag}(z)(I_{ext}(t)))).$$
+
+\item %[3.1.3:]
+From 3.2.2 and the definition of $I'_{bag}$,
+$$\underset{k\in \ZZ}{\bigwedge}(I'_{bag}(x)(k) = max(I'_{bag}(y)(k),I'_{bag}(z)(k))).$$
+
+\item %[3.1.4:]
+From 3.2.3 the semantic 2.2 of $T_{bag}$ and $L_{bag}$,
+$$I'_{bag}(x) = I'_{bag}(y) \cup I'_{bag}(z)$$.
+
+\end{enumerate}
+%usefull ? we admit in first step ?
+The reverse direction is shown similarly.
+
+Hence, 3.2 is valid.
+
+\end{enumerate} %% end of  3
+
+\item %[4.]
+$I'=(I_{int},I'_{bag})\models S4(\tilde{F}^3)$
+
+Proof: by 1, 2, and 3 above.
+
+
+\item %[5.]
+C.1
+
+Proof: by 4 and the definition of $I'$.
+
+\end{enumerate}
+\end{proof}
+
+% \begin{comp}
+% The function $S4$ does not conjunct any atom to $\tilde{F}^3$ while rewriting $L_{int}$ atoms
+% Moreover $S4$ just replaces atoms such as $a \in x $,$a \notin x $,$a \in^{n} x $,$a \notin^{n} x $ without adding any conjunct.
+% For each atom in $L{_bag}$, $L_{mix}$ not in the previous ones, S4 adds $|V_{int}(\tilde{F}^2) \cup V^{31}_{int})|$ conjuncts to $\tilde{F}^3$.
+% \end{comp}

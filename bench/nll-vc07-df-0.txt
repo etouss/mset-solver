@@ -1,0 +1,11 @@
+lhs = (
+[: [ nil:void,  x1:NLL_lvl2_t,  x2:NLL_lvl2_t,  x2_1:NLL_lvl1_t,  x3:NLL_lvl2_t,  - ]] 
+(and 
+)
+) 
+==>
+rhs = (
+[: [ nil:void,  x1:NLL_lvl2_t,  x2:NLL_lvl2_t,  x2_1:NLL_lvl1_t,  x3:NLL_lvl2_t, ??out_11:NLL_lvl2_t, ??u2:NLL_lvl2_t, ??Z12:NLL_lvl1_t,  - ]] x  [0 -> 0,1 -> 1,2 -> 2,3 -> 3,4 -> 4,5 -> 2,6 -> 4,7 -> 3,] 
+(and 
+)
+) 

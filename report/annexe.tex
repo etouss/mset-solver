@@ -1,0 +1,115 @@
+%!TEX root = main.tex
+
+\section{Annexe}
+
+\\SMTLIB2 syntax:
+\\
+\begin{tabular}{|c|c}
+  \hline
+  Constraints & SMT-LIB2 \\
+  \hline
+  $p\wedge q$ & $(and \;p \;q)$ \\
+  \hline
+  $p\vee q$ & $(or \;p \;q)$ \\
+  \hline
+  $p\Rightarrow q$ & $(=> \;p \;q)$ \\
+  \hline
+  $a+b$ & $(+\;a\;b)$ \\
+  \hline
+  $a-b$ & $(-\;a\;b)$ \\
+  \hline
+  $ite\; b\; a\; p$ & $(ite\;b\;a\;b)$ \\
+  \hline
+  $max(a,b)$ & $(max\;a\;b)$ \\
+  \hline
+  $min(a,b)$ & $(min\;a\;b)$ \\
+  \hline
+  $a\leq b$ & $(<= \;a\;b)$ \\
+  \hline
+  $a < b$ & $(< \;a\;b)$ \\
+  \hline
+  $a\geq b$ & $(>= \;a\;b)$ \\
+  \hline
+  $a > b$ & $(> \;a\;b)$ \\
+  \hline
+  $a = b$ & $(= \;a\;b)$ \\
+  \hline
+  $a\neq b$ & $(neq \;a\;b)$ \\
+  \hline
+  $\llbracket a \rrbracket$ & $(bag \;a)$ \\
+  \hline
+  $\llbracket a \rrbracket^{n}$ & $(bagn \;a \;n)$ \\
+  \hline
+  $\llbracket \rrbracket$ & $emptybag$ \\
+  \hline
+  $x \cup y$ & $(bagunion \;x \;y)$ \\
+  \hline
+  $x \cap y$ & $(baginter \;x \;y)$ \\
+  \hline
+  $x \uplus y$ & $(bagsum \;x \;y)$ \\
+  \hline
+  $x \setminus y$ & $(bagminus \;x \;y)$ \\
+  \hline
+  $x = y$ & $(= \;x \;y)$ \\
+  \hline
+  $x \neq y$ & $(neq \;x \;y)$ \\
+  \hline
+  $x \subseteq y$ & $(subseteq \;x \;y)$ \\
+  \hline
+  $x \nsubseteq y$ & $(nsubseteq \;x \;y)$ \\
+  \hline
+  $x \in y$ & $(in \;x \;y)$ \\
+  \hline
+  $x \in^{n} y$ & $(inn \;x \;y \;n)$ \\
+  \hline
+  $x \notin y$ & $(ni \;x \;y)$ \\
+  \hline
+  $ite \;b \;x \;y$ & $(ite\;b\;x\;y)$ \\
+  \hline
+  $max(x)$ & $(bagmax \;x )$ \\
+  \hline
+  $min(x)$ & $(bagmin \;x )$ \\
+  \hline
+  $x \leq y$ & $(<= \;x \;y)$ \\
+  \hline
+  $x \geq y$ & $(>= \;x \;y)$ \\
+  \hline
+  $x > y$ & $(> \;x \;y)$ \\
+  \hline
+  $x < y$ & $(< \;x \;y)$ \\
+  \hline
+
+
+  % $=$, $\neq$, $\subset$, $\subseteq$
+\end{tabular}
+
+
+% Real formula will be constitute of a Positive part which are conjunctions of form
+% and a set of negative conjonctions os form
+% \begin{itemize}
+% \renewcommand{\labelitemi}{-}
+% \setlength{\itemsep}{0cm}%
+% \setlength{\parskip}{0cm}%
+% \item $p_{i}$ the possitive conjonctions.
+% \item $q_{i}$ the negative conjonctions.
+% \end{itemize}
+%
+% % Whenever we have a formula $(\bigwedge i \in \nu_{int} p_{i})\Rightarrow q$
+% % There is an issue to get back to a conjonctions indeed we can not split and on the left side of an implies
+% % In order to do so we notice that assert ($(\bigwedge i \in \nu_{int} p_{i})\Rightarrow q$) is equivalent
+% % as assert(not( $notq \wedge (\bigwedge i \in \nu_{int} p_{i} $ ))
+% % So we just have to add this negatives conjonctions to the set
+% % \wedge \underset{N}{\bigwedge}(\neg\underset{J}{\bigwedge}q_{j})
+% \begin{tabular}{l c l}
+% $\underset{I}{\bigwedge}p_{i} \wedge t \; \#\;(ite\; b\; u\; v) $ & $\equiv$ & $\underset{I}{\bigwedge}p_{i}\wedge t \; \#\; ITE \wedge(b\Rightarrow (ITE = u)) \wedge (\neg b\Rightarrow (ITE = v))$ \\
+% $\neg(h \wedge t \; \#\;(ite\; b\; u\; v)) $ & $\equiv$ & $ \neg( h \wedge t \; \#\; ITE) \wedge(b\Rightarrow (ITE = u)) \wedge (\neg b\Rightarrow (ITE = v))$ \\
+% $\underset{I}{\bigwedge}p_{i} \wedge (u\Rightarrow v)$ & $\equiv$ & $\underset{I}{\bigwedge}p_{i} \wedge \neg (u\wedge\neg v)$ \\
+% $\neg(h \wedge (u\Rightarrow v)) $  & $\equiv$ &  $\neg(h \wedge v) \wedge \neg(h\wedge \neg u)$ \\
+% \end{tabular}
+%
+% \\Note: Mauvaise redaction.
+% \\
+% \begin{tabular}{l c l}
+% $\neg(h \wedge (x_{1} \neq x_{2})$ & \Rightarrow & $\underset{a_{i}\in\nu_{int}}{\bigwedge}\neg(h \wedge (X_{1}(a_{i}) \neq X_{2}(a_{i})))$ \\
+% $\neg(h \wedge (x_{1} \nsubseteq x_{2})$ & \Rightarrow & $\underset{a_{i}\in\nu_{int}}{\bigwedge}\neg(h \wedge (X_{1}(a_{i}) > X_{2}(a_{i})))$ \\
+% \end{tabular}

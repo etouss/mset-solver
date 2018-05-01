@@ -1,0 +1,22 @@
+%!TEX root = paper.tex
+
+\section{Conclusion}
+%\label{sec:concl}
+
+%\\ The main constraint of our logic it's the fact that we only work on $bag\_int$ in deed when we
+%try to produce same kind of result on element $e \in E$ where $E$ is set, which is solvable under a theorie $E$.
+%We are dealing with an issue: First of all $T$ have to implement $=$ , and order to work with everything.
+%However even if $T$ does the main optimisation to loose Non-deterministic rewritting can't be done
+%because element of $E$ canno't be mix with $int$ so we won't be able to solve
+%\\
+%$\llbracket a \rrbracket$ ; $baga$ ; $a\in baga$ and $\forall i \in \mathbb{Z} ( i \neq a  \Rightarrow i \notin baga )$
+%\\
+%But as notice in section X: $\llbracket a \rrbracket$ may be avoid in most formula thanks to $\in$ and other trick
+%\\ UF\_FREE formula won't be avoid cause their rewriting involve $(a = b) \Rightarrow \bigwedge_{x \in \nu_{bag}} \; xnba = xnbb $
+%Where $a$ , $b$ are $E$ element and $xnba$ , $xnbb$  are $int$
+%But $X : E->int$ can be define.
+We defined the logic \QFBILIA\ to express constraints over bags of integers. 
+We presented two decision procedures for \QFBILIA. 
+The insight of our work is that our procedures are deterministic due to the restriction to multi-sets of integers.
+The efficiency of our decision procedures rely on the SMT solvers. % upon which we are working. 
+For this reason we presented several improvements that may help to provide to existing SMT solvers formulas that efficiently dealt.
