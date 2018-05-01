@@ -1,0 +1,73 @@
+(set-logic QF_UFLIA)
+(define-fun max ((x Int) (y Int)) Int (ite (< x y) y x))
+(define-fun min ((x Int) (y Int)) Int (ite (> x y) y x))
+
+(declare-fun emptybag (Int) Int)
+(declare-fun M0 (Int) Int)
+(declare-fun M1 (Int) Int)
+(declare-fun key () Int)
+(declare-fun ret () Int)
+(declare-fun emptybagneqM1 () Int)
+(declare-fun BAGkey (Int) Int)
+(declare-fun M0neqM0MINUSBAGkeyMINUS () Int)
+
+
+(assert (and
+	(and
+		(= (M1 key ) (emptybag key ) )
+		(= (M1 emptybagneqM1 ) (emptybag emptybagneqM1 ) )
+		(= (M1 M0neqM0MINUSBAGkeyMINUS ) (emptybag M0neqM0MINUSBAGkeyMINUS ) )
+	)
+	(or
+ 		(= (M0 key ) 0 )
+		(>= (M1 key ) 1 )
+	)
+	(or
+ 		(= (M1 key ) 0 )
+		(>= (M0 key ) 1 )
+	)
+	(= ret 0 )
+))
+(assert (or
+ 	(distinct (M1 emptybagneqM1 ) (emptybag emptybagneqM1 ) )
+	(distinct (M1 emptybagneqM1 ) (emptybag emptybagneqM1 ) )
+	(distinct ((bagminus M0 BAGkey ) nil ) (M0 nil ) )
+	(distinct ret 0 )
+))
+(assert (and
+	(= (BAGkey key ) 1 )
+	(=>
+		(distinct key emptybagneqM1 )
+		(= (BAGkey emptybagneqM1 ) 0 ))
+	(=>
+		(distinct key M0neqM0MINUSBAGkeyMINUS )
+		(= (BAGkey M0neqM0MINUSBAGkeyMINUS ) 0 ))
+))
+(assert (and 
+
+(= (emptybag key ) 0 )
+
+(>= (M0 key ) 0 )
+
+(>= (M1 key ) 0 )
+
+(>= (BAGkey key ) 0 )
+
+(= (emptybag emptybagneqM1 ) 0 )
+
+(>= (M0 emptybagneqM1 ) 0 )
+
+(>= (M1 emptybagneqM1 ) 0 )
+
+(>= (BAGkey emptybagneqM1 ) 0 )
+
+(= (emptybag M0neqM0MINUSBAGkeyMINUS ) 0 )
+
+(>= (M0 M0neqM0MINUSBAGkeyMINUS ) 0 )
+
+(>= (M1 M0neqM0MINUSBAGkeyMINUS ) 0 )
+
+(>= (BAGkey M0neqM0MINUSBAGkeyMINUS ) 0 )
+
+))
+(check-sat)

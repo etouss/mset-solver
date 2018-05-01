@@ -1,0 +1,897 @@
+(set-logic QF_UFLIA)
+(define-fun max ((x Int) (y Int)) Int (ite (< x y) y x))
+(define-fun min ((x Int) (y Int)) Int (ite (> x y) y x))
+
+(declare-fun emptybag (Int) Int)
+(declare-fun M0 (Int) Int)
+(declare-fun M1 (Int) Int)
+(declare-fun M2 (Int) Int)
+(declare-fun M3 (Int) Int)
+(declare-fun M4 (Int) Int)
+(declare-fun key () Int)
+(declare-fun d1 () Int)
+(declare-fun ?M12 (Int) Int)
+(declare-fun ?M22 (Int) Int)
+(declare-fun ?M13 (Int) Int)
+(declare-fun ?M23 (Int) Int)
+(declare-fun bagmaxM3 () Int)
+(declare-fun bagminM4 () Int)
+(declare-fun BAGkey (Int) Int)
+(declare-fun BAGd1 (Int) Int)
+(declare-fun emptybagneq?M12 () Int)
+(declare-fun emptybagneq?M13 () Int)
+(declare-fun emptybagneq?M23 () Int)
+(declare-fun BAGkeyUNION?M13UNION?M23UNIONneq?M22 () Int)
+(declare-fun bagmin?M13 () Int)
+(declare-fun bagmax?M23 () Int)
+(declare-fun BAGd1UNION?M12UNION?M22UNIONneqM2 () Int)
+(declare-fun bagmin?M12 () Int)
+(declare-fun bagmax?M22 () Int)
+(declare-fun M0MINUSBAGkeyMINUSneqM0 () Int)
+(declare-fun M0UNIONBAGkeyUNIONneqM1 () Int)
+
+
+(assert (and
+	(and
+		(= (M3 key ) (emptybag key ) )
+		(= (M3 d1 ) (emptybag d1 ) )
+		(= (M3 bagmaxM3 ) (emptybag bagmaxM3 ) )
+		(= (M3 bagminM4 ) (emptybag bagminM4 ) )
+		(= (M3 emptybagneq?M12 ) (emptybag emptybagneq?M12 ) )
+		(= (M3 emptybagneq?M13 ) (emptybag emptybagneq?M13 ) )
+		(= (M3 emptybagneq?M23 ) (emptybag emptybagneq?M23 ) )
+		(= (M3 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (emptybag BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) )
+		(= (M3 bagmin?M13 ) (emptybag bagmin?M13 ) )
+		(= (M3 bagmax?M23 ) (emptybag bagmax?M23 ) )
+		(= (M3 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (emptybag BAGd1UNION?M12UNION?M22UNIONneqM2 ) )
+		(= (M3 bagmin?M12 ) (emptybag bagmin?M12 ) )
+		(= (M3 bagmax?M22 ) (emptybag bagmax?M22 ) )
+		(= (M3 M0MINUSBAGkeyMINUSneqM0 ) (emptybag M0MINUSBAGkeyMINUSneqM0 ) )
+		(= (M3 M0UNIONBAGkeyUNIONneqM1 ) (emptybag M0UNIONBAGkeyUNIONneqM1 ) )
+	)
+	(and
+		(= (M4 key ) (emptybag key ) )
+		(= (M4 d1 ) (emptybag d1 ) )
+		(= (M4 bagmaxM3 ) (emptybag bagmaxM3 ) )
+		(= (M4 bagminM4 ) (emptybag bagminM4 ) )
+		(= (M4 emptybagneq?M12 ) (emptybag emptybagneq?M12 ) )
+		(= (M4 emptybagneq?M13 ) (emptybag emptybagneq?M13 ) )
+		(= (M4 emptybagneq?M23 ) (emptybag emptybagneq?M23 ) )
+		(= (M4 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (emptybag BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) )
+		(= (M4 bagmin?M13 ) (emptybag bagmin?M13 ) )
+		(= (M4 bagmax?M23 ) (emptybag bagmax?M23 ) )
+		(= (M4 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (emptybag BAGd1UNION?M12UNION?M22UNIONneqM2 ) )
+		(= (M4 bagmin?M12 ) (emptybag bagmin?M12 ) )
+		(= (M4 bagmax?M22 ) (emptybag bagmax?M22 ) )
+		(= (M4 M0MINUSBAGkeyMINUSneqM0 ) (emptybag M0MINUSBAGkeyMINUSneqM0 ) )
+		(= (M4 M0UNIONBAGkeyUNIONneqM1 ) (emptybag M0UNIONBAGkeyUNIONneqM1 ) )
+	)
+	(< bagmaxM3 d1 )
+	(< d1 bagminM4 )
+	(or
+ 		(>= (M0 key ) 1 )
+		(and
+			(= (M1 key ) (max (M0 key ) (BAGkey key ) ) )
+			(= (M1 d1 ) (max (M0 d1 ) (BAGkey d1 ) ) )
+			(= (M1 bagmaxM3 ) (max (M0 bagmaxM3 ) (BAGkey bagmaxM3 ) ) )
+			(= (M1 bagminM4 ) (max (M0 bagminM4 ) (BAGkey bagminM4 ) ) )
+			(= (M1 emptybagneq?M12 ) (max (M0 emptybagneq?M12 ) (BAGkey emptybagneq?M12 ) ) )
+			(= (M1 emptybagneq?M13 ) (max (M0 emptybagneq?M13 ) (BAGkey emptybagneq?M13 ) ) )
+			(= (M1 emptybagneq?M23 ) (max (M0 emptybagneq?M23 ) (BAGkey emptybagneq?M23 ) ) )
+			(= (M1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (max (M0 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (BAGkey BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) ) )
+			(= (M1 bagmin?M13 ) (max (M0 bagmin?M13 ) (BAGkey bagmin?M13 ) ) )
+			(= (M1 bagmax?M23 ) (max (M0 bagmax?M23 ) (BAGkey bagmax?M23 ) ) )
+			(= (M1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (max (M0 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (BAGkey BAGd1UNION?M12UNION?M22UNIONneqM2 ) ) )
+			(= (M1 bagmin?M12 ) (max (M0 bagmin?M12 ) (BAGkey bagmin?M12 ) ) )
+			(= (M1 bagmax?M22 ) (max (M0 bagmax?M22 ) (BAGkey bagmax?M22 ) ) )
+			(= (M1 M0MINUSBAGkeyMINUSneqM0 ) (max (M0 M0MINUSBAGkeyMINUSneqM0 ) (BAGkey M0MINUSBAGkeyMINUSneqM0 ) ) )
+			(= (M1 M0UNIONBAGkeyUNIONneqM1 ) (max (M0 M0UNIONBAGkeyUNIONneqM1 ) (BAGkey M0UNIONBAGkeyUNIONneqM1 ) ) )
+		)
+	)
+	(or
+ 		(>= (M4 key ) 1 )
+		(and
+			(= (M2 key ) (max (BAGd1 key ) (max (M3 key ) (max (M4 key ) (BAGkey key ) ) ) ) )
+			(= (M2 d1 ) (max (BAGd1 d1 ) (max (M3 d1 ) (max (M4 d1 ) (BAGkey d1 ) ) ) ) )
+			(= (M2 bagmaxM3 ) (max (BAGd1 bagmaxM3 ) (max (M3 bagmaxM3 ) (max (M4 bagmaxM3 ) (BAGkey bagmaxM3 ) ) ) ) )
+			(= (M2 bagminM4 ) (max (BAGd1 bagminM4 ) (max (M3 bagminM4 ) (max (M4 bagminM4 ) (BAGkey bagminM4 ) ) ) ) )
+			(= (M2 emptybagneq?M12 ) (max (BAGd1 emptybagneq?M12 ) (max (M3 emptybagneq?M12 ) (max (M4 emptybagneq?M12 ) (BAGkey emptybagneq?M12 ) ) ) ) )
+			(= (M2 emptybagneq?M13 ) (max (BAGd1 emptybagneq?M13 ) (max (M3 emptybagneq?M13 ) (max (M4 emptybagneq?M13 ) (BAGkey emptybagneq?M13 ) ) ) ) )
+			(= (M2 emptybagneq?M23 ) (max (BAGd1 emptybagneq?M23 ) (max (M3 emptybagneq?M23 ) (max (M4 emptybagneq?M23 ) (BAGkey emptybagneq?M23 ) ) ) ) )
+			(= (M2 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (max (BAGd1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (max (M3 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (max (M4 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (BAGkey BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) ) ) ) )
+			(= (M2 bagmin?M13 ) (max (BAGd1 bagmin?M13 ) (max (M3 bagmin?M13 ) (max (M4 bagmin?M13 ) (BAGkey bagmin?M13 ) ) ) ) )
+			(= (M2 bagmax?M23 ) (max (BAGd1 bagmax?M23 ) (max (M3 bagmax?M23 ) (max (M4 bagmax?M23 ) (BAGkey bagmax?M23 ) ) ) ) )
+			(= (M2 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (max (BAGd1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (max (M3 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (max (M4 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (BAGkey BAGd1UNION?M12UNION?M22UNIONneqM2 ) ) ) ) )
+			(= (M2 bagmin?M12 ) (max (BAGd1 bagmin?M12 ) (max (M3 bagmin?M12 ) (max (M4 bagmin?M12 ) (BAGkey bagmin?M12 ) ) ) ) )
+			(= (M2 bagmax?M22 ) (max (BAGd1 bagmax?M22 ) (max (M3 bagmax?M22 ) (max (M4 bagmax?M22 ) (BAGkey bagmax?M22 ) ) ) ) )
+			(= (M2 M0MINUSBAGkeyMINUSneqM0 ) (max (BAGd1 M0MINUSBAGkeyMINUSneqM0 ) (max (M3 M0MINUSBAGkeyMINUSneqM0 ) (max (M4 M0MINUSBAGkeyMINUSneqM0 ) (BAGkey M0MINUSBAGkeyMINUSneqM0 ) ) ) ) )
+			(= (M2 M0UNIONBAGkeyUNIONneqM1 ) (max (BAGd1 M0UNIONBAGkeyUNIONneqM1 ) (max (M3 M0UNIONBAGkeyUNIONneqM1 ) (max (M4 M0UNIONBAGkeyUNIONneqM1 ) (BAGkey M0UNIONBAGkeyUNIONneqM1 ) ) ) ) )
+		)
+	)
+	(or
+ 		(= (M0 key ) 0 )
+		(>= (M4 key ) 1 )
+	)
+	(or
+ 		(= (M4 key ) 0 )
+		(>= (M0 key ) 1 )
+	)
+	(< d1 key )
+	(or
+ 		(= (M0 key ) 0 )
+		(and
+			(= (M1 key ) (M0 key ) )
+			(= (M1 d1 ) (M0 d1 ) )
+			(= (M1 bagmaxM3 ) (M0 bagmaxM3 ) )
+			(= (M1 bagminM4 ) (M0 bagminM4 ) )
+			(= (M1 emptybagneq?M12 ) (M0 emptybagneq?M12 ) )
+			(= (M1 emptybagneq?M13 ) (M0 emptybagneq?M13 ) )
+			(= (M1 emptybagneq?M23 ) (M0 emptybagneq?M23 ) )
+			(= (M1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (M0 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) )
+			(= (M1 bagmin?M13 ) (M0 bagmin?M13 ) )
+			(= (M1 bagmax?M23 ) (M0 bagmax?M23 ) )
+			(= (M1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (M0 BAGd1UNION?M12UNION?M22UNIONneqM2 ) )
+			(= (M1 bagmin?M12 ) (M0 bagmin?M12 ) )
+			(= (M1 bagmax?M22 ) (M0 bagmax?M22 ) )
+			(= (M1 M0MINUSBAGkeyMINUSneqM0 ) (M0 M0MINUSBAGkeyMINUSneqM0 ) )
+			(= (M1 M0UNIONBAGkeyUNIONneqM1 ) (M0 M0UNIONBAGkeyUNIONneqM1 ) )
+		)
+	)
+	(or
+ 		(= (M4 key ) 0 )
+		(and
+			(= (M2 key ) (max (BAGd1 key ) (max (M3 key ) (M4 key ) ) ) )
+			(= (M2 d1 ) (max (BAGd1 d1 ) (max (M3 d1 ) (M4 d1 ) ) ) )
+			(= (M2 bagmaxM3 ) (max (BAGd1 bagmaxM3 ) (max (M3 bagmaxM3 ) (M4 bagmaxM3 ) ) ) )
+			(= (M2 bagminM4 ) (max (BAGd1 bagminM4 ) (max (M3 bagminM4 ) (M4 bagminM4 ) ) ) )
+			(= (M2 emptybagneq?M12 ) (max (BAGd1 emptybagneq?M12 ) (max (M3 emptybagneq?M12 ) (M4 emptybagneq?M12 ) ) ) )
+			(= (M2 emptybagneq?M13 ) (max (BAGd1 emptybagneq?M13 ) (max (M3 emptybagneq?M13 ) (M4 emptybagneq?M13 ) ) ) )
+			(= (M2 emptybagneq?M23 ) (max (BAGd1 emptybagneq?M23 ) (max (M3 emptybagneq?M23 ) (M4 emptybagneq?M23 ) ) ) )
+			(= (M2 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (max (BAGd1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (max (M3 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) (M4 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) ) ) )
+			(= (M2 bagmin?M13 ) (max (BAGd1 bagmin?M13 ) (max (M3 bagmin?M13 ) (M4 bagmin?M13 ) ) ) )
+			(= (M2 bagmax?M23 ) (max (BAGd1 bagmax?M23 ) (max (M3 bagmax?M23 ) (M4 bagmax?M23 ) ) ) )
+			(= (M2 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (max (BAGd1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (max (M3 BAGd1UNION?M12UNION?M22UNIONneqM2 ) (M4 BAGd1UNION?M12UNION?M22UNIONneqM2 ) ) ) )
+			(= (M2 bagmin?M12 ) (max (BAGd1 bagmin?M12 ) (max (M3 bagmin?M12 ) (M4 bagmin?M12 ) ) ) )
+			(= (M2 bagmax?M22 ) (max (BAGd1 bagmax?M22 ) (max (M3 bagmax?M22 ) (M4 bagmax?M22 ) ) ) )
+			(= (M2 M0MINUSBAGkeyMINUSneqM0 ) (max (BAGd1 M0MINUSBAGkeyMINUSneqM0 ) (max (M3 M0MINUSBAGkeyMINUSneqM0 ) (M4 M0MINUSBAGkeyMINUSneqM0 ) ) ) )
+			(= (M2 M0UNIONBAGkeyUNIONneqM1 ) (max (BAGd1 M0UNIONBAGkeyUNIONneqM1 ) (max (M3 M0UNIONBAGkeyUNIONneqM1 ) (M4 M0UNIONBAGkeyUNIONneqM1 ) ) ) )
+		)
+	)
+))
+(assert (or
+ 	(distinct (?M12 emptybagneq?M12 ) (emptybag emptybagneq?M12 ) )
+	(distinct (?M13 emptybagneq?M13 ) (emptybag emptybagneq?M13 ) )
+	(distinct (?M23 emptybagneq?M23 ) (emptybag emptybagneq?M23 ) )
+	(distinct (?M22 nil ) ((bagunion BAGkey ?M13 ?M23 ) nil ) )
+	(>= bagmin?M13 key )
+	(>= key bagmax?M23 )
+	(distinct (M2 nil ) ((bagunion BAGd1 ?M12 ?M22 ) nil ) )
+	(>= bagmin?M12 d1 )
+	(>= d1 bagmax?M22 )
+	(distinct (M0 nil ) ((bagminus M0 BAGkey ) nil ) )
+	(distinct (M1 nil ) ((bagunion M0 BAGkey ) nil ) )
+))
+(assert (and
+	(>= (M3 bagmaxM3 ) 1 )
+	(=>
+		(> key bagmaxM3 )
+		(= (M3 key ) 0 ))
+	(=>
+		(> d1 bagmaxM3 )
+		(= (M3 d1 ) 0 ))
+	(=>
+		(> bagminM4 bagmaxM3 )
+		(= (M3 bagminM4 ) 0 ))
+	(=>
+		(> emptybagneq?M12 bagmaxM3 )
+		(= (M3 emptybagneq?M12 ) 0 ))
+	(=>
+		(> emptybagneq?M13 bagmaxM3 )
+		(= (M3 emptybagneq?M13 ) 0 ))
+	(=>
+		(> emptybagneq?M23 bagmaxM3 )
+		(= (M3 emptybagneq?M23 ) 0 ))
+	(=>
+		(> BAGkeyUNION?M13UNION?M23UNIONneq?M22 bagmaxM3 )
+		(= (M3 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(> bagmin?M13 bagmaxM3 )
+		(= (M3 bagmin?M13 ) 0 ))
+	(=>
+		(> bagmax?M23 bagmaxM3 )
+		(= (M3 bagmax?M23 ) 0 ))
+	(=>
+		(> BAGd1UNION?M12UNION?M22UNIONneqM2 bagmaxM3 )
+		(= (M3 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(> bagmin?M12 bagmaxM3 )
+		(= (M3 bagmin?M12 ) 0 ))
+	(=>
+		(> bagmax?M22 bagmaxM3 )
+		(= (M3 bagmax?M22 ) 0 ))
+	(=>
+		(> M0MINUSBAGkeyMINUSneqM0 bagmaxM3 )
+		(= (M3 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(> M0UNIONBAGkeyUNIONneqM1 bagmaxM3 )
+		(= (M3 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(>= (M4 bagminM4 ) 1 )
+	(=>
+		(< key bagminM4 )
+		(= (M4 key ) 0 ))
+	(=>
+		(< d1 bagminM4 )
+		(= (M4 d1 ) 0 ))
+	(=>
+		(< bagmaxM3 bagminM4 )
+		(= (M4 bagmaxM3 ) 0 ))
+	(=>
+		(< emptybagneq?M12 bagminM4 )
+		(= (M4 emptybagneq?M12 ) 0 ))
+	(=>
+		(< emptybagneq?M13 bagminM4 )
+		(= (M4 emptybagneq?M13 ) 0 ))
+	(=>
+		(< emptybagneq?M23 bagminM4 )
+		(= (M4 emptybagneq?M23 ) 0 ))
+	(=>
+		(< BAGkeyUNION?M13UNION?M23UNIONneq?M22 bagminM4 )
+		(= (M4 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(< bagmin?M13 bagminM4 )
+		(= (M4 bagmin?M13 ) 0 ))
+	(=>
+		(< bagmax?M23 bagminM4 )
+		(= (M4 bagmax?M23 ) 0 ))
+	(=>
+		(< BAGd1UNION?M12UNION?M22UNIONneqM2 bagminM4 )
+		(= (M4 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(< bagmin?M12 bagminM4 )
+		(= (M4 bagmin?M12 ) 0 ))
+	(=>
+		(< bagmax?M22 bagminM4 )
+		(= (M4 bagmax?M22 ) 0 ))
+	(=>
+		(< M0MINUSBAGkeyMINUSneqM0 bagminM4 )
+		(= (M4 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(< M0UNIONBAGkeyUNIONneqM1 bagminM4 )
+		(= (M4 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(= (BAGkey key ) 1 )
+	(=>
+		(distinct key d1 )
+		(= (BAGkey d1 ) 0 ))
+	(=>
+		(distinct key bagmaxM3 )
+		(= (BAGkey bagmaxM3 ) 0 ))
+	(=>
+		(distinct key bagminM4 )
+		(= (BAGkey bagminM4 ) 0 ))
+	(=>
+		(distinct key emptybagneq?M12 )
+		(= (BAGkey emptybagneq?M12 ) 0 ))
+	(=>
+		(distinct key emptybagneq?M13 )
+		(= (BAGkey emptybagneq?M13 ) 0 ))
+	(=>
+		(distinct key emptybagneq?M23 )
+		(= (BAGkey emptybagneq?M23 ) 0 ))
+	(=>
+		(distinct key BAGkeyUNION?M13UNION?M23UNIONneq?M22 )
+		(= (BAGkey BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(distinct key bagmin?M13 )
+		(= (BAGkey bagmin?M13 ) 0 ))
+	(=>
+		(distinct key bagmax?M23 )
+		(= (BAGkey bagmax?M23 ) 0 ))
+	(=>
+		(distinct key BAGd1UNION?M12UNION?M22UNIONneqM2 )
+		(= (BAGkey BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(distinct key bagmin?M12 )
+		(= (BAGkey bagmin?M12 ) 0 ))
+	(=>
+		(distinct key bagmax?M22 )
+		(= (BAGkey bagmax?M22 ) 0 ))
+	(=>
+		(distinct key M0MINUSBAGkeyMINUSneqM0 )
+		(= (BAGkey M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(distinct key M0UNIONBAGkeyUNIONneqM1 )
+		(= (BAGkey M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(= (BAGd1 d1 ) 1 )
+	(=>
+		(distinct d1 key )
+		(= (BAGd1 key ) 0 ))
+	(=>
+		(distinct d1 bagmaxM3 )
+		(= (BAGd1 bagmaxM3 ) 0 ))
+	(=>
+		(distinct d1 bagminM4 )
+		(= (BAGd1 bagminM4 ) 0 ))
+	(=>
+		(distinct d1 emptybagneq?M12 )
+		(= (BAGd1 emptybagneq?M12 ) 0 ))
+	(=>
+		(distinct d1 emptybagneq?M13 )
+		(= (BAGd1 emptybagneq?M13 ) 0 ))
+	(=>
+		(distinct d1 emptybagneq?M23 )
+		(= (BAGd1 emptybagneq?M23 ) 0 ))
+	(=>
+		(distinct d1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 )
+		(= (BAGd1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(distinct d1 bagmin?M13 )
+		(= (BAGd1 bagmin?M13 ) 0 ))
+	(=>
+		(distinct d1 bagmax?M23 )
+		(= (BAGd1 bagmax?M23 ) 0 ))
+	(=>
+		(distinct d1 BAGd1UNION?M12UNION?M22UNIONneqM2 )
+		(= (BAGd1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(distinct d1 bagmin?M12 )
+		(= (BAGd1 bagmin?M12 ) 0 ))
+	(=>
+		(distinct d1 bagmax?M22 )
+		(= (BAGd1 bagmax?M22 ) 0 ))
+	(=>
+		(distinct d1 M0MINUSBAGkeyMINUSneqM0 )
+		(= (BAGd1 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(distinct d1 M0UNIONBAGkeyUNIONneqM1 )
+		(= (BAGd1 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(>= (?M13 bagmin?M13 ) 1 )
+	(=>
+		(< key bagmin?M13 )
+		(= (?M13 key ) 0 ))
+	(=>
+		(< d1 bagmin?M13 )
+		(= (?M13 d1 ) 0 ))
+	(=>
+		(< bagmaxM3 bagmin?M13 )
+		(= (?M13 bagmaxM3 ) 0 ))
+	(=>
+		(< bagminM4 bagmin?M13 )
+		(= (?M13 bagminM4 ) 0 ))
+	(=>
+		(< emptybagneq?M12 bagmin?M13 )
+		(= (?M13 emptybagneq?M12 ) 0 ))
+	(=>
+		(< emptybagneq?M13 bagmin?M13 )
+		(= (?M13 emptybagneq?M13 ) 0 ))
+	(=>
+		(< emptybagneq?M23 bagmin?M13 )
+		(= (?M13 emptybagneq?M23 ) 0 ))
+	(=>
+		(< BAGkeyUNION?M13UNION?M23UNIONneq?M22 bagmin?M13 )
+		(= (?M13 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(< bagmax?M23 bagmin?M13 )
+		(= (?M13 bagmax?M23 ) 0 ))
+	(=>
+		(< BAGd1UNION?M12UNION?M22UNIONneqM2 bagmin?M13 )
+		(= (?M13 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(< bagmin?M12 bagmin?M13 )
+		(= (?M13 bagmin?M12 ) 0 ))
+	(=>
+		(< bagmax?M22 bagmin?M13 )
+		(= (?M13 bagmax?M22 ) 0 ))
+	(=>
+		(< M0MINUSBAGkeyMINUSneqM0 bagmin?M13 )
+		(= (?M13 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(< M0UNIONBAGkeyUNIONneqM1 bagmin?M13 )
+		(= (?M13 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(>= (?M23 bagmax?M23 ) 1 )
+	(=>
+		(> key bagmax?M23 )
+		(= (?M23 key ) 0 ))
+	(=>
+		(> d1 bagmax?M23 )
+		(= (?M23 d1 ) 0 ))
+	(=>
+		(> bagmaxM3 bagmax?M23 )
+		(= (?M23 bagmaxM3 ) 0 ))
+	(=>
+		(> bagminM4 bagmax?M23 )
+		(= (?M23 bagminM4 ) 0 ))
+	(=>
+		(> emptybagneq?M12 bagmax?M23 )
+		(= (?M23 emptybagneq?M12 ) 0 ))
+	(=>
+		(> emptybagneq?M13 bagmax?M23 )
+		(= (?M23 emptybagneq?M13 ) 0 ))
+	(=>
+		(> emptybagneq?M23 bagmax?M23 )
+		(= (?M23 emptybagneq?M23 ) 0 ))
+	(=>
+		(> BAGkeyUNION?M13UNION?M23UNIONneq?M22 bagmax?M23 )
+		(= (?M23 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(> bagmin?M13 bagmax?M23 )
+		(= (?M23 bagmin?M13 ) 0 ))
+	(=>
+		(> BAGd1UNION?M12UNION?M22UNIONneqM2 bagmax?M23 )
+		(= (?M23 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(> bagmin?M12 bagmax?M23 )
+		(= (?M23 bagmin?M12 ) 0 ))
+	(=>
+		(> bagmax?M22 bagmax?M23 )
+		(= (?M23 bagmax?M22 ) 0 ))
+	(=>
+		(> M0MINUSBAGkeyMINUSneqM0 bagmax?M23 )
+		(= (?M23 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(> M0UNIONBAGkeyUNIONneqM1 bagmax?M23 )
+		(= (?M23 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(>= (?M12 bagmin?M12 ) 1 )
+	(=>
+		(< key bagmin?M12 )
+		(= (?M12 key ) 0 ))
+	(=>
+		(< d1 bagmin?M12 )
+		(= (?M12 d1 ) 0 ))
+	(=>
+		(< bagmaxM3 bagmin?M12 )
+		(= (?M12 bagmaxM3 ) 0 ))
+	(=>
+		(< bagminM4 bagmin?M12 )
+		(= (?M12 bagminM4 ) 0 ))
+	(=>
+		(< emptybagneq?M12 bagmin?M12 )
+		(= (?M12 emptybagneq?M12 ) 0 ))
+	(=>
+		(< emptybagneq?M13 bagmin?M12 )
+		(= (?M12 emptybagneq?M13 ) 0 ))
+	(=>
+		(< emptybagneq?M23 bagmin?M12 )
+		(= (?M12 emptybagneq?M23 ) 0 ))
+	(=>
+		(< BAGkeyUNION?M13UNION?M23UNIONneq?M22 bagmin?M12 )
+		(= (?M12 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(< bagmin?M13 bagmin?M12 )
+		(= (?M12 bagmin?M13 ) 0 ))
+	(=>
+		(< bagmax?M23 bagmin?M12 )
+		(= (?M12 bagmax?M23 ) 0 ))
+	(=>
+		(< BAGd1UNION?M12UNION?M22UNIONneqM2 bagmin?M12 )
+		(= (?M12 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(< bagmax?M22 bagmin?M12 )
+		(= (?M12 bagmax?M22 ) 0 ))
+	(=>
+		(< M0MINUSBAGkeyMINUSneqM0 bagmin?M12 )
+		(= (?M12 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(< M0UNIONBAGkeyUNIONneqM1 bagmin?M12 )
+		(= (?M12 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and
+	(>= (?M22 bagmax?M22 ) 1 )
+	(=>
+		(> key bagmax?M22 )
+		(= (?M22 key ) 0 ))
+	(=>
+		(> d1 bagmax?M22 )
+		(= (?M22 d1 ) 0 ))
+	(=>
+		(> bagmaxM3 bagmax?M22 )
+		(= (?M22 bagmaxM3 ) 0 ))
+	(=>
+		(> bagminM4 bagmax?M22 )
+		(= (?M22 bagminM4 ) 0 ))
+	(=>
+		(> emptybagneq?M12 bagmax?M22 )
+		(= (?M22 emptybagneq?M12 ) 0 ))
+	(=>
+		(> emptybagneq?M13 bagmax?M22 )
+		(= (?M22 emptybagneq?M13 ) 0 ))
+	(=>
+		(> emptybagneq?M23 bagmax?M22 )
+		(= (?M22 emptybagneq?M23 ) 0 ))
+	(=>
+		(> BAGkeyUNION?M13UNION?M23UNIONneq?M22 bagmax?M22 )
+		(= (?M22 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 ))
+	(=>
+		(> bagmin?M13 bagmax?M22 )
+		(= (?M22 bagmin?M13 ) 0 ))
+	(=>
+		(> bagmax?M23 bagmax?M22 )
+		(= (?M22 bagmax?M23 ) 0 ))
+	(=>
+		(> BAGd1UNION?M12UNION?M22UNIONneqM2 bagmax?M22 )
+		(= (?M22 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 ))
+	(=>
+		(> bagmin?M12 bagmax?M22 )
+		(= (?M22 bagmin?M12 ) 0 ))
+	(=>
+		(> M0MINUSBAGkeyMINUSneqM0 bagmax?M22 )
+		(= (?M22 M0MINUSBAGkeyMINUSneqM0 ) 0 ))
+	(=>
+		(> M0UNIONBAGkeyUNIONneqM1 bagmax?M22 )
+		(= (?M22 M0UNIONBAGkeyUNIONneqM1 ) 0 ))
+))
+(assert (and 
+
+(= (emptybag key ) 0 )
+
+(>= (M0 key ) 0 )
+
+(>= (M1 key ) 0 )
+
+(>= (M2 key ) 0 )
+
+(>= (M3 key ) 0 )
+
+(>= (M4 key ) 0 )
+
+(>= (?M12 key ) 0 )
+
+(>= (?M22 key ) 0 )
+
+(>= (?M13 key ) 0 )
+
+(>= (?M23 key ) 0 )
+
+(>= (BAGkey key ) 0 )
+
+(>= (BAGd1 key ) 0 )
+
+(= (emptybag d1 ) 0 )
+
+(>= (M0 d1 ) 0 )
+
+(>= (M1 d1 ) 0 )
+
+(>= (M2 d1 ) 0 )
+
+(>= (M3 d1 ) 0 )
+
+(>= (M4 d1 ) 0 )
+
+(>= (?M12 d1 ) 0 )
+
+(>= (?M22 d1 ) 0 )
+
+(>= (?M13 d1 ) 0 )
+
+(>= (?M23 d1 ) 0 )
+
+(>= (BAGkey d1 ) 0 )
+
+(>= (BAGd1 d1 ) 0 )
+
+(= (emptybag bagmaxM3 ) 0 )
+
+(>= (M0 bagmaxM3 ) 0 )
+
+(>= (M1 bagmaxM3 ) 0 )
+
+(>= (M2 bagmaxM3 ) 0 )
+
+(>= (M3 bagmaxM3 ) 0 )
+
+(>= (M4 bagmaxM3 ) 0 )
+
+(>= (?M12 bagmaxM3 ) 0 )
+
+(>= (?M22 bagmaxM3 ) 0 )
+
+(>= (?M13 bagmaxM3 ) 0 )
+
+(>= (?M23 bagmaxM3 ) 0 )
+
+(>= (BAGkey bagmaxM3 ) 0 )
+
+(>= (BAGd1 bagmaxM3 ) 0 )
+
+(= (emptybag bagminM4 ) 0 )
+
+(>= (M0 bagminM4 ) 0 )
+
+(>= (M1 bagminM4 ) 0 )
+
+(>= (M2 bagminM4 ) 0 )
+
+(>= (M3 bagminM4 ) 0 )
+
+(>= (M4 bagminM4 ) 0 )
+
+(>= (?M12 bagminM4 ) 0 )
+
+(>= (?M22 bagminM4 ) 0 )
+
+(>= (?M13 bagminM4 ) 0 )
+
+(>= (?M23 bagminM4 ) 0 )
+
+(>= (BAGkey bagminM4 ) 0 )
+
+(>= (BAGd1 bagminM4 ) 0 )
+
+(= (emptybag emptybagneq?M12 ) 0 )
+
+(>= (M0 emptybagneq?M12 ) 0 )
+
+(>= (M1 emptybagneq?M12 ) 0 )
+
+(>= (M2 emptybagneq?M12 ) 0 )
+
+(>= (M3 emptybagneq?M12 ) 0 )
+
+(>= (M4 emptybagneq?M12 ) 0 )
+
+(>= (?M12 emptybagneq?M12 ) 0 )
+
+(>= (?M22 emptybagneq?M12 ) 0 )
+
+(>= (?M13 emptybagneq?M12 ) 0 )
+
+(>= (?M23 emptybagneq?M12 ) 0 )
+
+(>= (BAGkey emptybagneq?M12 ) 0 )
+
+(>= (BAGd1 emptybagneq?M12 ) 0 )
+
+(= (emptybag emptybagneq?M13 ) 0 )
+
+(>= (M0 emptybagneq?M13 ) 0 )
+
+(>= (M1 emptybagneq?M13 ) 0 )
+
+(>= (M2 emptybagneq?M13 ) 0 )
+
+(>= (M3 emptybagneq?M13 ) 0 )
+
+(>= (M4 emptybagneq?M13 ) 0 )
+
+(>= (?M12 emptybagneq?M13 ) 0 )
+
+(>= (?M22 emptybagneq?M13 ) 0 )
+
+(>= (?M13 emptybagneq?M13 ) 0 )
+
+(>= (?M23 emptybagneq?M13 ) 0 )
+
+(>= (BAGkey emptybagneq?M13 ) 0 )
+
+(>= (BAGd1 emptybagneq?M13 ) 0 )
+
+(= (emptybag emptybagneq?M23 ) 0 )
+
+(>= (M0 emptybagneq?M23 ) 0 )
+
+(>= (M1 emptybagneq?M23 ) 0 )
+
+(>= (M2 emptybagneq?M23 ) 0 )
+
+(>= (M3 emptybagneq?M23 ) 0 )
+
+(>= (M4 emptybagneq?M23 ) 0 )
+
+(>= (?M12 emptybagneq?M23 ) 0 )
+
+(>= (?M22 emptybagneq?M23 ) 0 )
+
+(>= (?M13 emptybagneq?M23 ) 0 )
+
+(>= (?M23 emptybagneq?M23 ) 0 )
+
+(>= (BAGkey emptybagneq?M23 ) 0 )
+
+(>= (BAGd1 emptybagneq?M23 ) 0 )
+
+(= (emptybag BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (M0 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (M1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (M2 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (M3 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (M4 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (?M12 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (?M22 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (?M13 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (?M23 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (BAGkey BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(>= (BAGd1 BAGkeyUNION?M13UNION?M23UNIONneq?M22 ) 0 )
+
+(= (emptybag bagmin?M13 ) 0 )
+
+(>= (M0 bagmin?M13 ) 0 )
+
+(>= (M1 bagmin?M13 ) 0 )
+
+(>= (M2 bagmin?M13 ) 0 )
+
+(>= (M3 bagmin?M13 ) 0 )
+
+(>= (M4 bagmin?M13 ) 0 )
+
+(>= (?M12 bagmin?M13 ) 0 )
+
+(>= (?M22 bagmin?M13 ) 0 )
+
+(>= (?M13 bagmin?M13 ) 0 )
+
+(>= (?M23 bagmin?M13 ) 0 )
+
+(>= (BAGkey bagmin?M13 ) 0 )
+
+(>= (BAGd1 bagmin?M13 ) 0 )
+
+(= (emptybag bagmax?M23 ) 0 )
+
+(>= (M0 bagmax?M23 ) 0 )
+
+(>= (M1 bagmax?M23 ) 0 )
+
+(>= (M2 bagmax?M23 ) 0 )
+
+(>= (M3 bagmax?M23 ) 0 )
+
+(>= (M4 bagmax?M23 ) 0 )
+
+(>= (?M12 bagmax?M23 ) 0 )
+
+(>= (?M22 bagmax?M23 ) 0 )
+
+(>= (?M13 bagmax?M23 ) 0 )
+
+(>= (?M23 bagmax?M23 ) 0 )
+
+(>= (BAGkey bagmax?M23 ) 0 )
+
+(>= (BAGd1 bagmax?M23 ) 0 )
+
+(= (emptybag BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (M0 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (M1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (M2 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (M3 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (M4 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (?M12 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (?M22 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (?M13 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (?M23 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (BAGkey BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(>= (BAGd1 BAGd1UNION?M12UNION?M22UNIONneqM2 ) 0 )
+
+(= (emptybag bagmin?M12 ) 0 )
+
+(>= (M0 bagmin?M12 ) 0 )
+
+(>= (M1 bagmin?M12 ) 0 )
+
+(>= (M2 bagmin?M12 ) 0 )
+
+(>= (M3 bagmin?M12 ) 0 )
+
+(>= (M4 bagmin?M12 ) 0 )
+
+(>= (?M12 bagmin?M12 ) 0 )
+
+(>= (?M22 bagmin?M12 ) 0 )
+
+(>= (?M13 bagmin?M12 ) 0 )
+
+(>= (?M23 bagmin?M12 ) 0 )
+
+(>= (BAGkey bagmin?M12 ) 0 )
+
+(>= (BAGd1 bagmin?M12 ) 0 )
+
+(= (emptybag bagmax?M22 ) 0 )
+
+(>= (M0 bagmax?M22 ) 0 )
+
+(>= (M1 bagmax?M22 ) 0 )
+
+(>= (M2 bagmax?M22 ) 0 )
+
+(>= (M3 bagmax?M22 ) 0 )
+
+(>= (M4 bagmax?M22 ) 0 )
+
+(>= (?M12 bagmax?M22 ) 0 )
+
+(>= (?M22 bagmax?M22 ) 0 )
+
+(>= (?M13 bagmax?M22 ) 0 )
+
+(>= (?M23 bagmax?M22 ) 0 )
+
+(>= (BAGkey bagmax?M22 ) 0 )
+
+(>= (BAGd1 bagmax?M22 ) 0 )
+
+(= (emptybag M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (M0 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (M1 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (M2 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (M3 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (M4 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (?M12 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (?M22 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (?M13 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (?M23 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (BAGkey M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(>= (BAGd1 M0MINUSBAGkeyMINUSneqM0 ) 0 )
+
+(= (emptybag M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (M0 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (M1 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (M2 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (M3 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (M4 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (?M12 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (?M22 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (?M13 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (?M23 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (BAGkey M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+(>= (BAGd1 M0UNIONBAGkeyUNIONneqM1 ) 0 )
+
+))
+(check-sat)

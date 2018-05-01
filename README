@@ -1,0 +1,15 @@
+
+This is the root directory for the solver on multiset constraints
+developed during Etienne Toussaint's internship.
+
+Directories:
+
+src : includes sources of the solver
+
+doc : includes the internal documentation of the solver
+
+tst : includes the tests done
+
+report : includes the sources for the report
+
+

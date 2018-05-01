@@ -1,0 +1,10 @@
+(set-logic QF_SLRDI)
+(declare-fun emptybag () BagInt)(assert (and 
+ )
+ ) 
+ (assert (not 
+(and 
+ )
+ ) 
+)
+(check-sat)

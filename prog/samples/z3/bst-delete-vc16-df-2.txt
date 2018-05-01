@@ -1,0 +1,43 @@
+lhs = (
+[: [ nil:void,  root0:Bst_t,  cur1:Bst_t,  cur2:Bst_t,  parent:Bst_t,  keynode:Bst_t,  rgt:Bst_t,  nxtparent2:Bst_t,  X:Bst_t,  Y:Bst_t,  Z:Bst_t,  U:Bst_t,  V:Bst_t,  M0:BagInt,  M1:BagInt,  M2:BagInt,  M3:BagInt,  M4:BagInt,  M5:BagInt,  M6:BagInt,  M7:BagInt,  M8:BagInt,  M9:BagInt,  M10:BagInt,  key:Int,  keymin:Int,  d1:Int,  d2:Int,  d3:Int,  - ]] 
+(and 
+	(= M10 (bagunion (bag d3 ) M6 M7 ) )
+	(< M6 (bag d3 ) )
+	(< (bag d3 ) M7 )
+	(= M4 (bagunion (bag d2 ) M5 M10 ) )
+	(< M5 (bag d2 ) )
+	(< (bag d2 ) M10 )
+	(= M1 (bagminus M0 (bag key ) ) )
+	(= M2 (bagminus (bagunion (bag d1 ) M3 M4 ) (bag key ) ) )
+	(< M3 (bag d1 ) )
+	(< (bag d1 ) M4 )
+	(< d1 key )
+	(=> (subset (bag key ) M0 )(subset (bag key ) M4 ))
+	(=> (subset (bag key ) M4 )(subset (bag key ) M0 ))
+	(= M9 (bagminus M10 (bag keymin ) ) )
+	(subset (bag keymin ) M6 )
+	(<= (bag keymin ) M6 )
+	(= M8 M9 )
+	(= key d2 )
+)
+) 
+==>
+rhs = (
+[: [ nil:void,  root0:Bst_t,  cur1:Bst_t,  cur2:Bst_t,  parent:Bst_t,  keynode:Bst_t,  rgt:Bst_t,  nxtparent2:Bst_t,  X:Bst_t,  Y:Bst_t,  Z:Bst_t,  U:Bst_t,  V:Bst_t,  M0:BagInt,  M1:BagInt,  M2:BagInt,  M3:BagInt,  M4:BagInt,  M5:BagInt,  M6:BagInt,  M7:BagInt,  M8:BagInt,  M9:BagInt,  M10:BagInt,  key:Int,  keymin:Int,  d1:Int,  d2:Int,  d3:Int,  - ]] x  [0 -> 0,1 -> 1,2 -> 2,3 -> 3,4 -> 4,5 -> 2,6 -> 6,7 -> 6,8 -> 8,9 -> 9,10 -> 10,11 -> 6,12 -> 3,13 -> 13,14 -> 14,15 -> 15,16 -> 16,17 -> 17,18 -> 18,19 -> 19,20 -> 20,21 -> 21,22 -> 21,23 -> 23,24 -> 24,25 -> 25,26 -> 26,27 -> 24,28 -> 28,] 
+(and 
+	(< M5 (bag key ) )
+	(< (bag key ) (bagunion M8 (bag keymin ) ) )
+	(= M8 (bagminus (bagunion (bag d3 ) M6 M7 ) (bag keymin ) ) )
+	(< M6 (bag d3 ) )
+	(< (bag d3 ) M7 )
+	(= M4 (bagunion (bag key ) M5 M8 (bag keymin ) ) )
+	(subset (bag key ) M0 )
+	(= M1 (bagminus M0 (bag key ) ) )
+	(= M2 (bagminus (bagunion (bag d1 ) M3 M4 ) (bag key ) ) )
+	(< M3 (bag d1 ) )
+	(< (bag d1 ) M4 )
+	(< d1 key )
+	(subset (bag keymin ) M6 )
+	(<= (bag keymin ) M6 )
+)
+) 
